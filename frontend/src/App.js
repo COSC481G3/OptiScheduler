@@ -35,7 +35,7 @@ function Home() {
   return (
     <>
       <main>
-        <h2>Welcome to the homepage!</h2>
+        <h2>Welcome to the homepage! :)</h2>
         <p>Here's some data retrieved from the backend:</p>
         <><p>{data.name}</p><p>{data.response}</p></>
       </main>

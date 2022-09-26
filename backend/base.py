@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder='../frontend/build')
 def hello_world():
     response_body = {
         "name": "Hello!",
-        "response": "Hello, world!"
+        "response": "Hello, world! :)"
     }
 
     return response_body
@@ -22,4 +22,4 @@ def main(path):
         return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == "__main__":
-    serve(app, listen='*:9090')
+    serve(app, listen='*:5000')
