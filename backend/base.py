@@ -21,9 +21,5 @@ def main(path):
     else:
         return send_from_directory(app.static_folder, 'index.html')
 
-#@app.errorhandler(404)
-#def not_found(e):
-#    return app.send_static_file('../frontend/build/index.html')
-
 if __name__ == "__main__":
     serve(app, listen='*:9090')
