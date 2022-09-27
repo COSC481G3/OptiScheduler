@@ -7,6 +7,8 @@ services:
       - "5000:5000"
     volumes:
       - ./backend:/app/backend
+    environment:
+      MYSQL_PASSWORD: '${DBPASS}'
   frontend:
     build: ./frontend
     container_name: frontend
@@ -14,8 +16,11 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app/frontend
-  db:
+  opti_db:
     image: "mysql"
-    container_name: mysql
+    container_name: opti_db
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: '${DBPASS}'
+      MYSQL_ROOT_PASSWORD: 'verycomplexpassword'

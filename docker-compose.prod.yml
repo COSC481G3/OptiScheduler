@@ -1,11 +1,17 @@
 version: "3.9"
 services:
-  app:
+  opti_app:
     build: .
-    container_name: optischeduler
+    container_name: opti_app
     ports:
       - "5000:5000"
-  db:
-    image: "mysql"
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_PASSWORD: '${DBPASS}'
+  opti_db:
+    image: "mysql"
+    container_name: opti_db
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: '${DBPASS}'
+      MYSQL_ROOT_PASSWORD: 'verycomplexpassword'
