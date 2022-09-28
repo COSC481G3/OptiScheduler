@@ -16,6 +16,7 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app/frontend
+      - /app/frontend/node_modules
   opti_db:
     image: "mysql"
     container_name: opti_db

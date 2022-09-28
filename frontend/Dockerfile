@@ -9,6 +9,10 @@ RUN npm install
 # Move to container
 COPY . .
 
+# Set perms
+RUN chown -R node /app/frontend/node_modules
+USER node
+
 # Launch app
 CMD ["npm", "start"]
 EXPOSE 3000
