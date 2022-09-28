@@ -25,4 +25,4 @@ To build for production, run:
 
 Stop the container (Control+C), and run:
 
-    docker system prune
+    docker system prune --volumes
