@@ -1,9 +1,10 @@
 from flask import Flask, send_from_directory, request
+import logging
 from waitress import serve
 import os
 import db
 
-app = Flask(__name__, static_folder='../frontend/build')
+app = Flask("OptiServe", static_folder='../frontend/build')
 
 # localhost:5000/api/hello
 @app.route('/api/hello')
