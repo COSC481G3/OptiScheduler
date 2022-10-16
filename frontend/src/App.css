@@ -7,6 +7,17 @@
   pointer-events: none;
 }
 
+body {
+  background-color: #131516;
+  color: white;
+  font-family: 'Roboto', sans-serif;
+}
+
+.wrapper {
+  max-width: 900px;
+  margin: auto;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;

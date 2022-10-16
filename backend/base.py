@@ -24,8 +24,9 @@ def addUser():
         username = request.args.get('username')
         password = request.args.get('password')
     elif request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        jsonres = request.get_json()
+        username = jsonres.get('username')
+        password = jsonres.get('password')
     if(username is None or password is None):
         return {
             "error": "Value cannot be null!"
@@ -52,8 +53,9 @@ def getToken():
         username = request.args.get('username')
         password = request.args.get('password')
     elif request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        jsonres = request.get_json()
+        username = jsonres.get("username")
+        password = jsonres.get('password')
     if(username is None or password is None):
         return {
             "error": "Value cannot be null!"
@@ -79,7 +81,8 @@ def getUser():
     if request.method == 'GET':
         token = request.args.get('token')
     elif request.method == 'POST':
-        token = request.form['token']
+        jsonres = request.get_json()
+        token = jsonres.get('token')
     if(token is None):
         return {
             "error": "Value cannot be null!"
@@ -103,7 +106,8 @@ def getStore():
     if request.method == 'GET':
         token = request.args.get('token')
     elif request.method == 'POST':
-        token = request.form['token']
+        jsonres = request.get_json()
+        token = jsonres.get('token')
     if(token is None):
         return {
             "error": "Value cannot be null!"
@@ -128,8 +132,9 @@ def setStoreName():
         token = request.args.get('token')
         name = request.args.get('name')
     elif request.method == 'POST':
-        token = request.form['token']
-        name = request.form['name']
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        name = jsonres.get('token')
     if(token is None or name is None):
         return {
             "error": "Value cannot be null!"
@@ -161,8 +166,9 @@ def setStoreAddress():
         token = request.args.get('token')
         address = request.args.get('address')
     elif request.method == 'POST':
-        token = request.form['token']
-        address = request.form['address']
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        address = jsonres.get('address')
     if(token is None or address is None):
         return {
             "error": "Value cannot be null!"
@@ -195,9 +201,10 @@ def addEmployee():
         firstname = request.args.get('firstname')
         lastname = request.args.get('lastname')
     elif request.method == 'POST':
-        token = request.form['token']
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        firstname = jsonres.get('firstname')
+        lastname = jsonres.get('lastname')
     if(token is None or firstname is None or lastname is None):
         return {
             "error": "Value cannot be null!"
@@ -231,7 +238,8 @@ def getEmployees():
     if request.method == 'GET':
         token = request.args.get('token')
     elif request.method == 'POST':
-        token = request.form['token']
+        jsonres = request.get_json()
+        token = jsonres.get('token')
     if(token is None):
         return {
             "error": "Value cannot be null!"
@@ -258,8 +266,9 @@ def getEmployee():
         token = request.args.get('token')
         id = request.args.get('id')
     elif request.method == 'POST':
-        token = request.form['token']
-        id = request.form['id']
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        id = jsonres.get('id')
     if(token is None or id is None):
         return {
             "error": "Value cannot be null!"

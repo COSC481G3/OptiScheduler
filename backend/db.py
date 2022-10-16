@@ -6,6 +6,7 @@ import logging
 import secrets
 import string
 import re
+import bcrypt
 
 log = logging.getLogger("OptiServe.db")
 
@@ -215,9 +216,6 @@ class Store:
 class User:
     #Adds user and generates id & token
     def add(self, username: str, password: str):
-        self.store = Store()
-        self.store.add()
-
         #Validate username
         if(re.search("^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$", username)):
             self.username = username
@@ -226,13 +224,21 @@ class User:
         
         #Validate password
         if(re.search("^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$", password)):
-            self.password = password
+            #hash password
+            salt = bcrypt.gensalt()
+            hashedpw = bcrypt.hashpw(password.encode('utf-8'), salt)
+            self.password = hashedpw
         else:
             return "Password must be at least 8 characters, contain one letter and one number."
         
         #Generate token
         self.token = ''.join(secrets.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for i in range(20))
 
+
+        #Generate store
+        self.store = Store()
+        self.store.add()
+        
         #Insert into DB
         ex = execute("INSERT INTO User (store_id, username, password, token) VALUES (%s, %s, %s, %s)", (self.store.id, self.username, self.password, self.token))
         if(ex == "Database error."):
@@ -245,7 +251,7 @@ class User:
     #Gets user with username & password
     def getUserPass(self, username: str, password: str):
         cursor = db.cursor(buffered=True)
-        cursor.execute("SELECT * FROM User WHERE username = %s AND password = %s", (username, password))
+        cursor.execute("SELECT * FROM User WHERE username = %s", (username, ))
         result = cursor.fetchone()
         cursor.close()
 
@@ -254,7 +260,13 @@ class User:
             self.store = Store()
             self.store.get(result[1])
             self.username = result[2]
-            self.password = result[3]
+
+            #check hashed pw
+            if(bcrypt.checkpw(password.encode('utf-8'), result[3].encode('utf-8'))):
+                self.password = result[3]
+            else:
+                return "Wrong password!"
+            
             self.token = result[4]
         else:
             log.warning("Could not find user.")

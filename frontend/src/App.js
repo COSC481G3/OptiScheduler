@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route, Link } from "react-router-dom";
+import './App.css';
+import Loginsignup from './components/Login/Login';
 
 function App() {
+  const [token, setToken] = useState();
+
+  if (!token) {
+    return <Loginsignup setToken={setToken} />
+  }
 
   return (
-    <div>
-
+    <div className="wrapper">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="about" element={<About />} />
       </Routes>
-
     </div>
   )
 }
