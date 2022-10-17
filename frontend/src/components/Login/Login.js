@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import './Login.css'
 
@@ -60,7 +60,7 @@ function Login({ setToken }) {
         <div className="login-wrapper">
             <div className="login-div">
                 <form onSubmit={handleSubmit}>
-                    <h3>Sign In</h3>
+                    <h3>OptiScheduler</h3>
                     <label>
                         Username
                     </label>
@@ -81,6 +81,7 @@ function SignUp() {
     const [username, setUserName] = useState();
     const [password, setPassword] = useState();
     const [password2, setPassword2] = useState();
+    let navigate = useNavigate();
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -98,7 +99,8 @@ function SignUp() {
         if (typeof token.error !== 'undefined') {
             alert(token.error)
         } else {
-            alert("Success! Please sign in.")
+            alert("Success! Please sign in.");
+            navigate("/");
         }
     }
 
@@ -106,7 +108,7 @@ function SignUp() {
         <div className="login-wrapper">
             <div className="login-div">
                 <form onSubmit={handleSubmit}>
-                    <h3>Sign Up</h3>
+                    <h3>OptiScheduler</h3>
                     <label>
                         Username
                     </label>
