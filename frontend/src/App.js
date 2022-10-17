@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Routes, Route, Link } from "react-router-dom";
 import './App.css';
 import Loginsignup from './components/Login/Login';
+import Employees from './components/Employees/Employees'
 
 function App() {
   const [token, setToken] = useState();
@@ -11,11 +12,19 @@ function App() {
   }
 
   return (
-    <div className="wrapper">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="about" element={<About />} />
-      </Routes>
+    <div>
+      <nav>
+        <Link to="/">Home</Link>
+        <Link to="/employees">Employees</Link>
+        <Link to="/about">About</Link>
+      </nav>
+      <div className="wrapper">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="about" element={<About />} />
+          <Route path="employees/*" element={<Employees token={token} />} />
+        </Routes>
+      </div>
     </div>
   )
 }
@@ -44,9 +53,6 @@ function Home() {
         <p>Here's some data retrieved from the backend:</p>
         <><p>{data.name}</p><p>{data.response}</p></>
       </main>
-      <nav>
-        <Link to="/about">About</Link>
-      </nav>
     </>
   )
 }
@@ -59,9 +65,6 @@ function About() {
         <h2>Who are we?</h2>
         <p>We are group 3!</p>
       </main>
-      <nav>
-        <Link to="/">Home</Link>
-      </nav>
     </>
   )
 }

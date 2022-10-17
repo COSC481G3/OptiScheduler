@@ -1,13 +1,21 @@
 from flask import Flask, send_from_directory, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from waitress import serve
 import os
 import json
 import db
 
 app = Flask("OptiServe", static_folder='../frontend/build')
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    storage_uri="memory://"
+)
 
 # localhost:5000/api/hello
 @app.route('/api/hello')
+@limiter.exempt
 def hello_world():
 
     return {
@@ -17,6 +25,7 @@ def hello_world():
 
 # localhost:5000/api/addUser?username=X&password=X
 @app.route('/api/addUser', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def addUser():
 
     #Get params
@@ -46,6 +55,7 @@ def addUser():
 
 # localhost:5000/api/getToken?username=X&password=X
 @app.route('/api/getToken', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def getToken():
 
     #Get params
@@ -75,6 +85,7 @@ def getToken():
 
 # localhost:5000/api/getUser?token=X
 @app.route('/api/getUser', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def getUser():
 
     #Get params
@@ -100,6 +111,7 @@ def getUser():
 
 # localhost:5000/api/getStore?token=X
 @app.route('/api/getStore', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def getStore():
 
     #Get params
@@ -125,6 +137,7 @@ def getStore():
 
 # localhost:5000/api/setStoreName?name=X&token=X
 @app.route('/api/setStoreName', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def setStoreName():
 
     #Get params
@@ -159,6 +172,7 @@ def setStoreName():
 
 # localhost:5000/api/setStoreName?name=X&token=X
 @app.route('/api/setStoreAddress', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def setStoreAddress():
 
     #Get params
@@ -193,6 +207,7 @@ def setStoreAddress():
 
 # localhost:5000/api/addEmployee?token=X&firstname=X&lastname=X
 @app.route('/api/addEmployee', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def addEmployee():
 
     #Get params
@@ -232,6 +247,7 @@ def addEmployee():
 
 # localhost:5000/api/getEmployees?token=X
 @app.route('/api/getEmployees', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def getEmployees():
 
     #Get params
@@ -247,7 +263,7 @@ def getEmployees():
     
     #Get user
     user = db.User()
-    err = user.get(token)
+    err = user.get(str(token))
     if(err):
         return {
             "error": err
@@ -259,6 +275,7 @@ def getEmployees():
 
 # localhost:5000/api/getEmployee?token=X&id=X
 @app.route('/api/getEmployee', methods=['GET', 'POST'])
+@limiter.limit("1/second")
 def getEmployee():
 
     #Get params

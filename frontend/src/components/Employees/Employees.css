@@ -1,0 +1,10 @@
+.employee {
+    background-color: #ff5131;
+    border-radius: 10px;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+.employee .name {
+    font-size: 30px;
+}

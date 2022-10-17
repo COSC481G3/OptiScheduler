@@ -7,7 +7,8 @@
 form{
     height: 520px;
     width: 400px;
-    background-color: rgba(255,255,255,0.13);
+    /*background-color: rgba(255, 255, 255, 0);*/
+    background-color: #212121;
     position: absolute;
     transform: translate(-50%,-50%);
     top: 50%;
@@ -45,7 +46,8 @@ input{
     display: block;
     height: 50px;
     width: 100%;
-    background-color: rgba(255,255,255,0.07);
+    background-color: rgba(255,255,255,0.10);
+    color: #ffffff;
     border-radius: 3px;
     padding: 0 10px;
     margin-top: 8px;
@@ -71,11 +73,13 @@ button{
     text-decoration: none;
     margin-top: 50px;
     width: 100%;
-    color: white;
+    color: #ffffff;
     background-color: rgba(255,255,255,0.07);
     padding: 15px 0;
     font-size: 18px;
     font-weight: 600;
     border-radius: 5px;
     cursor: pointer;
+    border-color: black;
+    border-style:solid;
 }

@@ -32,6 +32,7 @@ def init_db():
 db = init_db()
 
 def create_db():
+    db.ping(True)
     cursor = db.cursor(buffered=True)
     cursor.execute("USE db")
 
@@ -84,6 +85,7 @@ create_db()
 
 #Shorthand execute w/ error catching. Returns if db error.
 def execute(query: str, params: tuple):
+    db.ping(True)
     cursor = db.cursor()
     try:
         cursor.execute(query, params)
@@ -116,6 +118,7 @@ class Employee:
     
     #Get employee w/ id
     def get(self, id: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
         cursor.execute("SELECT * FROM Employee WHERE Employee_id = %s", (id, ))
         result = cursor.fetchone()
@@ -158,6 +161,7 @@ class Store:
     
     #Get Store using ID, returning if successful
     def get(self, id: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
         cursor.execute("SELECT * FROM Store WHERE store_id = %s", (id, ))
         result = cursor.fetchone()
@@ -192,6 +196,7 @@ class Store:
     
     #Get all employees for store
     def getEmployees(self):
+        db.ping(True)
         cursor = db.cursor()
         cursor.execute("SELECT * FROM Employee WHERE store_id = %s", (self.id, ))
         result = cursor.fetchall()
@@ -250,6 +255,7 @@ class User:
     
     #Gets user with username & password
     def getUserPass(self, username: str, password: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
         cursor.execute("SELECT * FROM User WHERE username = %s", (username, ))
         result = cursor.fetchone()
@@ -275,6 +281,7 @@ class User:
     
     #Gets user with token
     def get(self, token: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
         cursor.execute("SELECT * FROM User WHERE token = %s", (token, ))
         result = cursor.fetchone()
