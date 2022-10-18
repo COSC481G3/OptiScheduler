@@ -3,6 +3,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import './App.css';
 import Loginsignup from './components/Login/Login';
 import Employees from './components/Employees/Employees'
+import Sidebar from './components/Sidebar';
 
 function App() {
   const [token, setToken] = useState();
@@ -25,6 +26,8 @@ function App() {
           <Route path="employees/*" element={<Employees token={token} />} />
         </Routes>
       </div>
+
+      <Sidebar />
     </div>
   )
 }
@@ -49,7 +52,7 @@ function Home() {
   return (
     <>
       <main>
-        <h2>Welcome to the homepage! :)</h2>
+        <h2>Welcome to the homepage! test :)</h2>
         <p>Here's some data retrieved from the backend:</p>
         <><p>{data.name}</p><p>{data.response}</p></>
       </main>

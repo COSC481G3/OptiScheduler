@@ -25,3 +25,9 @@ nav a {
 nav a:hover {
   background-color: #d50000;
 }
+
+.Sidebar {
+  height: 100%;
+  width: 250px;
+  background-color: #2F4050;
+}
