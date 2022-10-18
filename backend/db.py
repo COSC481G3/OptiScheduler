@@ -6,6 +6,7 @@ import logging
 import secrets
 import string
 import re
+import bcrypt
 
 log = logging.getLogger("OptiServe.db")
 
@@ -31,6 +32,7 @@ def init_db():
 db = init_db()
 
 def create_db():
+    db.ping(True)
     cursor = db.cursor(buffered=True)
     cursor.execute("USE db")
 
@@ -82,7 +84,8 @@ def create_db():
 create_db()
 
 #Shorthand execute w/ error catching. Returns if db error.
-def execute(query: str, params: tuple):
+def execute(query: str, params: tuple, returnID: bool = False):
+    db.ping(True)
     cursor = db.cursor()
     try:
         cursor.execute(query, params)
@@ -94,7 +97,9 @@ def execute(query: str, params: tuple):
     id = cursor.lastrowid
     db.commit()
     cursor.close()
-    return id
+
+    if(returnID):
+        return id
 
 class Employee:
     #Add employee
@@ -106,7 +111,7 @@ class Employee:
         self.DOB = DOB
 
         #Insert into DB
-        ex = execute("INSERT INTO Employee (store_id, first_name, last_name, PTO_Days_Rem, DOB) VALUES (%s, %s, %s, %s, %s)", (store_id, first_name, last_name, PTO_Days_Rem, DOB))
+        ex = execute("INSERT INTO Employee (store_id, first_name, last_name, PTO_Days_Rem, DOB) VALUES (%s, %s, %s, %s, %s)", (store_id, first_name, last_name, PTO_Days_Rem, DOB), True)
         if(ex == "Database error."):
             return ex
         
@@ -115,6 +120,7 @@ class Employee:
     
     #Get employee w/ id
     def get(self, id: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
         cursor.execute("SELECT * FROM Employee WHERE Employee_id = %s", (id, ))
         result = cursor.fetchone()
@@ -129,6 +135,27 @@ class Employee:
             self.DOB = result[5]
         else:
             return "Could not find Employee."
+        
+    #Set employee data
+    def set(self, first_name: str = None, last_name: str = None, PTO_Days_Rem: int = None, DOB: str = None):
+        if(not self.first_name):
+            return "Cannot set before initialization!"
+
+        if(first_name):
+            self.first_name = first_name
+        if(last_name):
+            self.last_name = last_name
+        if(PTO_Days_Rem):
+            self.PTO_Days_Rem = PTO_Days_Rem
+        if(DOB):
+            self.DOB = DOB
+        
+        log.warning("Employee \"" + self.first_name + "\" has been updated!")
+        return execute("UPDATE Employee SET first_name = %s, last_name = %s, PTO_Days_Rem = %s, DOB = %s WHERE Employee_id = %s", (self.first_name, self.last_name, self.PTO_Days_Rem, self.DOB, self.id))
+    
+    def delete(self):
+        log.warning("Employee \"" + self.first_name + "\" has been deleted!")
+        return execute("DELETE FROM Employee WHERE Employee_id = %s", (self.id, ))
         
     def to_dict(self):
         return {
@@ -147,7 +174,7 @@ class Store:
         self.address = address
 
         #Insert into DB
-        ex = execute("INSERT INTO Store (store_name, store_address) VALUES (%s, %s)", (self.name, self.address))
+        ex = execute("INSERT INTO Store (store_name, store_address) VALUES (%s, %s)", (self.name, self.address), True)
         if(ex == "Database error."):
             return ex
         
@@ -157,6 +184,7 @@ class Store:
     
     #Get Store using ID, returning if successful
     def get(self, id: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
         cursor.execute("SELECT * FROM Store WHERE store_id = %s", (id, ))
         result = cursor.fetchone()
@@ -191,6 +219,7 @@ class Store:
     
     #Get all employees for store
     def getEmployees(self):
+        db.ping(True)
         cursor = db.cursor()
         cursor.execute("SELECT * FROM Employee WHERE store_id = %s", (self.id, ))
         result = cursor.fetchall()
@@ -215,9 +244,6 @@ class Store:
 class User:
     #Adds user and generates id & token
     def add(self, username: str, password: str):
-        self.store = Store()
-        self.store.add()
-
         #Validate username
         if(re.search("^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$", username)):
             self.username = username
@@ -226,15 +252,23 @@ class User:
         
         #Validate password
         if(re.search("^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$", password)):
-            self.password = password
+            #hash password
+            salt = bcrypt.gensalt()
+            hashedpw = bcrypt.hashpw(password.encode('utf-8'), salt)
+            self.password = hashedpw
         else:
             return "Password must be at least 8 characters, contain one letter and one number."
         
         #Generate token
         self.token = ''.join(secrets.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for i in range(20))
 
+
+        #Generate store
+        self.store = Store()
+        self.store.add()
+        
         #Insert into DB
-        ex = execute("INSERT INTO User (store_id, username, password, token) VALUES (%s, %s, %s, %s)", (self.store.id, self.username, self.password, self.token))
+        ex = execute("INSERT INTO User (store_id, username, password, token) VALUES (%s, %s, %s, %s)", (self.store.id, self.username, self.password, self.token), True)
         if(ex == "Database error."):
             return ex
         
@@ -244,8 +278,9 @@ class User:
     
     #Gets user with username & password
     def getUserPass(self, username: str, password: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
-        cursor.execute("SELECT * FROM User WHERE username = %s AND password = %s", (username, password))
+        cursor.execute("SELECT * FROM User WHERE username = %s", (username, ))
         result = cursor.fetchone()
         cursor.close()
 
@@ -254,7 +289,13 @@ class User:
             self.store = Store()
             self.store.get(result[1])
             self.username = result[2]
-            self.password = result[3]
+
+            #check hashed pw
+            if(bcrypt.checkpw(password.encode('utf-8'), result[3].encode('utf-8'))):
+                self.password = result[3]
+            else:
+                return "Wrong password!"
+            
             self.token = result[4]
         else:
             log.warning("Could not find user.")
@@ -263,6 +304,7 @@ class User:
     
     #Gets user with token
     def get(self, token: str):
+        db.ping(True)
         cursor = db.cursor(buffered=True)
         cursor.execute("SELECT * FROM User WHERE token = %s", (token, ))
         result = cursor.fetchone()
