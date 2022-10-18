@@ -27,8 +27,18 @@ export default function Store({ token }){
         }).then(res => res.json()
         ).then(
             data => {
-                setStoreName(data.name);
-                setStoreAddress(data.address);
+                if(data.name === " "){
+                    setStoreName("");
+                } else {
+                    setStoreName(data.name);
+                }
+
+                if(data.address === " "){
+                    setStoreAddress("");
+                } else {
+                    setStoreAddress(data.address)
+                }
+
                 console.log(data);
             }
         )
