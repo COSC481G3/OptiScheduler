@@ -209,7 +209,7 @@ class Store:
             self.address = address
         
         log.warning("Store \"" + self.name + "\" has been updated!")
-        return execute("UPDATE Store SET store_name = %s, store_address = %s WHERE store_id = %s", (self.name, self.address,))
+        return execute("UPDATE Store SET store_name = %s, store_address = %s WHERE store_id = %s", (self.name, self.address, self.id))
     
     #Get all employees for store
     def getEmployees(self):
