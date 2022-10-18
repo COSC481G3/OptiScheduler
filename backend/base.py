@@ -218,8 +218,8 @@ def addEmployee():
     elif request.method == 'POST':
         jsonres = request.get_json()
         token = jsonres.get('token')
-        firstname = jsonres.get('firstname')
-        lastname = jsonres.get('lastname')
+        firstname = jsonres.get('first_name')
+        lastname = jsonres.get('last_name')
     if(token is None or firstname is None or lastname is None):
         return {
             "error": "Value cannot be null!"
@@ -263,7 +263,7 @@ def getEmployees():
     
     #Get user
     user = db.User()
-    err = user.get(str(token))
+    err = user.get(token)
     if(err):
         return {
             "error": err
