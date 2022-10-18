@@ -136,7 +136,7 @@ class Employee:
         else:
             return "Could not find Employee."
         
-    #Set employee data
+    #Set optional employee data
     def set(self, first_name: str = None, last_name: str = None, PTO_Days_Rem: int = None, DOB: str = None):
         if(not self.first_name):
             return "Cannot set before initialization!"
@@ -153,6 +153,7 @@ class Employee:
         log.warning("Employee \"" + self.first_name + "\" has been updated!")
         return execute("UPDATE Employee SET first_name = %s, last_name = %s, PTO_Days_Rem = %s, DOB = %s WHERE Employee_id = %s", (self.first_name, self.last_name, self.PTO_Days_Rem, self.DOB, self.id))
     
+    #Delete employee from db
     def delete(self):
         log.warning("Employee \"" + self.first_name + "\" has been deleted!")
         return execute("DELETE FROM Employee WHERE Employee_id = %s", (self.id, ))
@@ -197,25 +198,18 @@ class Store:
         else:
             return "Could not find store."
     
-    #Sets the name of Store
-    def setName(self, name: str) -> str:
+    #Set store with optional values name, address
+    def set(self, name: str = None, address: str = None):
         if(not self.name):
             return "Cannot set name before initialization!"
-
-        self.name = name
-
-        log.warning("Store \"" + self.name + "\" has been updated!")
-        return execute("UPDATE Store SET store_name = %s WHERE store_id = %s", (self.name, self.id))
-    
-    #Sets the address of Store
-    def setAddress(self, address: str) -> str:
-        if(not self.address):
-            return "Cannot set address before initialization"
         
-        self.address = address
-
-        log.warning("Store \"" + str(self.id) + "\" has been updated!")
-        return execute("UPDATE Store SET store_address = %s WHERE store_id = %s", (self.address, self.id))
+        if(name):
+            self.name = name
+        if(address):
+            self.address = address
+        
+        log.warning("Store \"" + self.name + "\" has been updated!")
+        return execute("UPDATE Store SET store_name = %s, store_address = %s WHERE store_id = %s", (self.name, self.address,))
     
     #Get all employees for store
     def getEmployees(self):

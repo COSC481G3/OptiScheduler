@@ -3,6 +3,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import './App.css';
 import Loginsignup from './components/Login/Login';
 import Employees from './components/Employees/Employees'
+import Store from './components/Store/Store'
 
 function App() {
   const [token, setToken] = useState();
@@ -16,6 +17,7 @@ function App() {
       <nav>
         <Link to="/">Home</Link>
         <Link to="/employees">Employees</Link>
+        <Link to="/store">Store</Link>
         <Link to="/about">About</Link>
       </nav>
       <div className="wrapper">
@@ -23,6 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="about" element={<About />} />
           <Route path="employees/*" element={<Employees token={token} />} />
+          <Route path="store" element={<Store token={token} />} />
         </Routes>
       </div>
     </div>
