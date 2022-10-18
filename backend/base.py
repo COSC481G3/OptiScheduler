@@ -273,6 +273,102 @@ def getEmployees():
     employees = [emp.to_dict() for emp in user.store.getEmployees()]
     return json.dumps({"employees": employees}, default=str)
 
+@app.route('/api/setEmployee', methods=['GET', 'POST'])
+@limiter.limit("1/second")
+def setEmployee():
+
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        id = request.args.get('id')
+        firstname = request.args.get('firstname')
+        lastname = request.args.get('lastname')
+        pto = request.args.get('pto')
+        dob = request.args.get('dob')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        id = jsonres.get('emp_id')
+        firstname = jsonres.get('first_name')
+        lastname = jsonres.get('last_name')
+        pto = jsonres.get('pto')
+        dob = jsonres.get('dob')
+    if(token is None or id is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get employee
+    emp = db.Employee()
+    err = emp.get(id)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Set employee
+    err = emp.set(firstname, lastname, pto, dob)
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully added employee."
+        }
+
+@app.route('/api/deleteEmployee', methods=['GET', 'POST'])
+@limiter.limit("1/second")
+def deleteEmployee():
+
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        id = request.args.get('id')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        id = jsonres.get('emp_id')
+    if(token is None or id is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get employee
+    emp = db.Employee()
+    err = emp.get(id)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Delete employee
+    err = emp.delete()
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully deleted employee."
+        }
+
 # localhost:5000/api/getEmployee?token=X&id=X
 @app.route('/api/getEmployee', methods=['GET', 'POST'])
 @limiter.limit("1/second")

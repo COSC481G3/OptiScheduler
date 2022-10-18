@@ -4,7 +4,7 @@
     justify-content: center;
 }
 
-form{
+.login-wrapper form{
     height: 520px;
     width: 400px;
     /*background-color: rgba(255, 255, 255, 0);*/
@@ -20,7 +20,7 @@ form{
     padding: 50px 35px;
 }
 
-form *{
+.login-wrapper form *{
     font-family: 'Roboto', sans-serif;
     color: #ffffff;
     letter-spacing: 0.5px;
@@ -28,21 +28,21 @@ form *{
     border: none;
 }
 
-form h3{
+.login-wrapper form h3{
     font-size: 32px;
     font-weight: 500;
     line-height: 42px;
     text-align: center;
 }
 
-label{
+.login-wrapper label{
     display: block;
     margin-top: 30px;
     font-size: 16px;
     font-weight: 500;
 }
 
-input{
+.login-wrapper input{
     display: block;
     height: 50px;
     width: 100%;
@@ -55,7 +55,7 @@ input{
     font-weight: 300;
 }
 
-button{
+.login-wrapper button{
     margin-top: 50px;
     width: 100%;
     background-color: #ffffff;
@@ -67,7 +67,7 @@ button{
     cursor: pointer;
 }
 
-.altbutton{
+.login-wrapper .altbutton{
     display: block;
     text-align: center;
     text-decoration: none;

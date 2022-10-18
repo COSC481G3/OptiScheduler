@@ -4,8 +4,131 @@
     border-radius: 10px;
     padding: 10px;
     margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 
 .employee .name {
     font-size: 30px;
+    margin-right: 10px;
+}
+
+.employee .dob {
+    margin-right: 10px;
+}
+
+.emp-wrapper .search {
+    display: block;
+    color: black;
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    padding: 5px;
+    background-color: rgba(255,255,255,0.55);
+    border-radius: 5px;
+}
+
+.emp-wrapper form{
+    height: 520px;
+    width: 400px;
+    /*background-color: rgba(255, 255, 255, 0);*/
+    background-color: #212121;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 50px 35px;
+}
+
+.emp-wrapper form *{
+    font-family: 'Roboto', sans-serif;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    outline: none;
+    border: none;
+}
+
+.emp-wrapper form h3{
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 42px;
+    text-align: center;
+}
+
+.emp-wrapper form label{
+    display: block;
+    margin-top: 30px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.emp-wrapper form input{
+    display: block;
+    height: 50px;
+    width: 100%;
+    background-color: rgba(255,255,255,0.10);
+    color: #ffffff;
+    border-radius: 3px;
+    padding: 0 10px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.emp-wrapper form button{
+    margin-top: 50px;
+    width: 100%;
+    background-color: #ffffff;
+    color: #080710;
+    padding: 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.emp-wrapper form .altbutton{
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 10px;
+    width: 100%;
+    color: #ffffff;
+    background-color: rgba(255,255,255,0.07);
+    padding: 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    border-color: black;
+    border-style:solid;
+}
+
+.left {
+    margin-left: auto;
+}
+
+.addemployee {
+    display: block;
+    text-decoration: none;
+    background: none;
+    border-style:none;
+    border-color: grey;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    float: left;
+    cursor:pointer;
+}
+
+.addemployee:hover {
+    background-color: #d50000;
 }
