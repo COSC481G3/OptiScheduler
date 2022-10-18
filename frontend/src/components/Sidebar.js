@@ -4,7 +4,7 @@ import '../App.css'
 function Sidebar() {
   return (
     <div className = 'Sidebar'>
-        
+        can u see me
     </div>
   )
 }
