@@ -4,8 +4,9 @@ import './App.css';
 import Loginsignup from './components/Login/Login';
 import Employees from './components/Employees/Employees'
 import Sidebar from './components/Sidebar';
-import '././bootstrap/dist/css/bootstrap.min.css';
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+// import '././node_modules/node_modules/bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
+import { BrowserRouter as Router, Route, Switch, Routes, Link } from "react-router-dom";
 import { NavigationBar } from './components/NavigationBar';
 
 function App() {
