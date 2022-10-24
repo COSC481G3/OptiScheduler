@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Routes, Route, Link } from "react-router-dom";
+// import { Routes, Route, Link } from "react-router-dom";
 import './App.css';
 import Loginsignup from './components/Login/Login';
 import Employees from './components/Employees/Employees'
 import Sidebar from './components/Sidebar';
+import '././bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { NavigationBar } from './components/NavigationBar';
 
 function App() {
   const [token, setToken] = useState();
@@ -14,7 +17,7 @@ function App() {
 
   return (
     <div>
-      <nav>
+      {/* <nav>
         <Link to="/">Home</Link>
         <Link to="/employees">Employees</Link>
         <Link to="/about">About</Link>
@@ -25,9 +28,13 @@ function App() {
           <Route path="about" element={<About />} />
           <Route path="employees/*" element={<Employees token={token} />} />
         </Routes>
-      </div>
+      </div> */}
 
-
+      <React.Fragment>
+        <Router>
+          <NavigationBar />
+        </Router>
+      </React.Fragment>
     </div>
   )
 }
