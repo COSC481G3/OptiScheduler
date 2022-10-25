@@ -135,20 +135,22 @@ def getStore():
     else:
         return json.dumps(user.store.to_dict())
 
-# localhost:5000/api/setStoreName?name=X&token=X
-@app.route('/api/setStoreName', methods=['GET', 'POST'])
+# localhost:5000/api/setStore?token=X&store_name=X&store_address=X
+@app.route('/api/setStore', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def setStoreName():
 
     #Get params
     if request.method == 'GET':
         token = request.args.get('token')
-        name = request.args.get('name')
+        name = request.args.get('store_name')
+        address = request.args.get('store_address')
     elif request.method == 'POST':
         jsonres = request.get_json()
         token = jsonres.get('token')
-        name = jsonres.get('token')
-    if(token is None or name is None):
+        name = jsonres.get('store_name')
+        address = jsonres.get('store_address')
+    if(token is None):
         return {
             "error": "Value cannot be null!"
         }
@@ -162,48 +164,15 @@ def setStoreName():
         }
     
     #Set name
-    err = user.store.setName(name)
+    err = user.store.set(name, address)
     if(err):
         return {
             "error": err
         }
     else:
-        return json.dumps(user.store.to_dict())
-
-# localhost:5000/api/setStoreName?name=X&token=X
-@app.route('/api/setStoreAddress', methods=['GET', 'POST'])
-@limiter.limit("1/second")
-def setStoreAddress():
-
-    #Get params
-    if request.method == 'GET':
-        token = request.args.get('token')
-        address = request.args.get('address')
-    elif request.method == 'POST':
-        jsonres = request.get_json()
-        token = jsonres.get('token')
-        address = jsonres.get('address')
-    if(token is None or address is None):
         return {
-            "error": "Value cannot be null!"
+            "success": "Successfully updated store."
         }
-    
-    #Get user
-    user = db.User()
-    err = user.get(token)
-    if(err):
-        return {
-            "error": err
-        }
-    
-    #Set address
-    err = user.store.setAddress(address)
-    if(err):
-        return {
-            "error": err
-        }
-    else:
-        return json.dumps(user.store.to_dict())
 
 # localhost:5000/api/addEmployee?token=X&firstname=X&lastname=X
 @app.route('/api/addEmployee', methods=['GET', 'POST'])
@@ -273,7 +242,105 @@ def getEmployees():
     employees = [emp.to_dict() for emp in user.store.getEmployees()]
     return json.dumps({"employees": employees}, default=str)
 
-# localhost:5000/api/getEmployee?token=X&id=X
+# localhost:5000/api/setEmployee?token=X&emp_id=X&first_name=X
+@app.route('/api/setEmployee', methods=['GET', 'POST'])
+@limiter.limit("1/second")
+def setEmployee():
+
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        id = request.args.get('emp_id')
+        firstname = request.args.get('first_name')
+        lastname = request.args.get('last_name')
+        pto = request.args.get('pto')
+        dob = request.args.get('dob')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        id = jsonres.get('emp_id')
+        firstname = jsonres.get('first_name')
+        lastname = jsonres.get('last_name')
+        pto = jsonres.get('pto')
+        dob = jsonres.get('dob')
+    if(token is None or id is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get employee
+    emp = db.Employee()
+    err = emp.get(id)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Set employee
+    err = emp.set(firstname, lastname, pto, dob)
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully added employee."
+        }
+
+# localhost:5000/api/deleteEmployee?token=X
+@app.route('/api/deleteEmployee', methods=['GET', 'POST'])
+@limiter.limit("1/second")
+def deleteEmployee():
+
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        id = request.args.get('emp_id')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        id = jsonres.get('emp_id')
+    if(token is None or id is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get employee
+    emp = db.Employee()
+    err = emp.get(id)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Delete employee
+    err = emp.delete()
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully deleted employee."
+        }
+
+# localhost:5000/api/getEmployee?token=X&emp_id=X
 @app.route('/api/getEmployee', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getEmployee():
@@ -281,11 +348,11 @@ def getEmployee():
     #Get params
     if request.method == 'GET':
         token = request.args.get('token')
-        id = request.args.get('id')
+        id = request.args.get('emp_id')
     elif request.method == 'POST':
         jsonres = request.get_json()
         token = jsonres.get('token')
-        id = jsonres.get('id')
+        id = jsonres.get('emp_id')
     if(token is None or id is None):
         return {
             "error": "Value cannot be null!"

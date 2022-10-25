@@ -84,7 +84,7 @@ def create_db():
 create_db()
 
 #Shorthand execute w/ error catching. Returns if db error.
-def execute(query: str, params: tuple):
+def execute(query: str, params: tuple, returnID: bool = False):
     db.ping(True)
     cursor = db.cursor()
     try:
@@ -97,7 +97,9 @@ def execute(query: str, params: tuple):
     id = cursor.lastrowid
     db.commit()
     cursor.close()
-    return id
+
+    if(returnID):
+        return id
 
 class Employee:
     #Add employee
@@ -109,7 +111,7 @@ class Employee:
         self.DOB = DOB
 
         #Insert into DB
-        ex = execute("INSERT INTO Employee (store_id, first_name, last_name, PTO_Days_Rem, DOB) VALUES (%s, %s, %s, %s, %s)", (store_id, first_name, last_name, PTO_Days_Rem, DOB))
+        ex = execute("INSERT INTO Employee (store_id, first_name, last_name, PTO_Days_Rem, DOB) VALUES (%s, %s, %s, %s, %s)", (store_id, first_name, last_name, PTO_Days_Rem, DOB), True)
         if(ex == "Database error."):
             return ex
         
@@ -134,6 +136,28 @@ class Employee:
         else:
             return "Could not find Employee."
         
+    #Set optional employee data
+    def set(self, first_name: str = None, last_name: str = None, PTO_Days_Rem: int = None, DOB: str = None):
+        if(not self.first_name):
+            return "Cannot set before initialization!"
+
+        if(first_name):
+            self.first_name = first_name
+        if(last_name):
+            self.last_name = last_name
+        if(PTO_Days_Rem):
+            self.PTO_Days_Rem = PTO_Days_Rem
+        if(DOB):
+            self.DOB = DOB
+        
+        log.warning("Employee \"" + self.first_name + "\" has been updated!")
+        return execute("UPDATE Employee SET first_name = %s, last_name = %s, PTO_Days_Rem = %s, DOB = %s WHERE Employee_id = %s", (self.first_name, self.last_name, self.PTO_Days_Rem, self.DOB, self.id))
+    
+    #Delete employee from db
+    def delete(self):
+        log.warning("Employee \"" + self.first_name + "\" has been deleted!")
+        return execute("DELETE FROM Employee WHERE Employee_id = %s", (self.id, ))
+        
     def to_dict(self):
         return {
             "id": self.id,
@@ -151,7 +175,7 @@ class Store:
         self.address = address
 
         #Insert into DB
-        ex = execute("INSERT INTO Store (store_name, store_address) VALUES (%s, %s)", (self.name, self.address))
+        ex = execute("INSERT INTO Store (store_name, store_address) VALUES (%s, %s)", (self.name, self.address), True)
         if(ex == "Database error."):
             return ex
         
@@ -174,25 +198,18 @@ class Store:
         else:
             return "Could not find store."
     
-    #Sets the name of Store
-    def setName(self, name: str) -> str:
+    #Set store with optional values name, address
+    def set(self, name: str = None, address: str = None):
         if(not self.name):
             return "Cannot set name before initialization!"
-
-        self.name = name
-
-        log.warning("Store \"" + self.name + "\" has been updated!")
-        return execute("UPDATE Store SET store_name = %s WHERE store_id = %s", (self.name, self.id))
-    
-    #Sets the address of Store
-    def setAddress(self, address: str) -> str:
-        if(not self.address):
-            return "Cannot set address before initialization"
         
-        self.address = address
-
-        log.warning("Store \"" + str(self.id) + "\" has been updated!")
-        return execute("UPDATE Store SET store_address = %s WHERE store_id = %s", (self.address, self.id))
+        if(name):
+            self.name = name
+        if(address):
+            self.address = address
+        
+        log.warning("Store \"" + self.name + "\" has been updated!")
+        return execute("UPDATE Store SET store_name = %s, store_address = %s WHERE store_id = %s", (self.name, self.address, self.id))
     
     #Get all employees for store
     def getEmployees(self):
@@ -245,7 +262,7 @@ class User:
         self.store.add()
         
         #Insert into DB
-        ex = execute("INSERT INTO User (store_id, username, password, token) VALUES (%s, %s, %s, %s)", (self.store.id, self.username, self.password, self.token))
+        ex = execute("INSERT INTO User (store_id, username, password, token) VALUES (%s, %s, %s, %s)", (self.store.id, self.username, self.password, self.token), True)
         if(ex == "Database error."):
             return ex
         
