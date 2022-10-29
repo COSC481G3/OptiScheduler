@@ -10,15 +10,21 @@ import { BrowserRouter as Router, Route, Switch, Routes, Link } from "react-rout
 import { NavigationBar } from './components/NavigationBar';
 import Store from './components/Store/Store'
 function App() {
-  const [token, setToken] = useState();
+  // const [token, setToken] = useState();
 
-  if (!token) {
-    return <Loginsignup setToken={setToken} />
-  }
+  // if (!token) {
+  //   return <Loginsignup setToken={setToken} />
+  // }
 
   return (
-    <div>
-      {/* <nav>
+
+    <React.Fragment>
+        <Router>
+          <NavigationBar />
+        </Router>
+      </React.Fragment>
+    //<div>
+      /* <nav>
         <Link to="/">Home</Link>
         <Link to="/employees">Employees</Link>
         <Link to="/store">Store</Link>
@@ -31,14 +37,23 @@ function App() {
           <Route path="employees/*" element={<Employees token={token} />} />
           <Route path="store" element={<Store token={token} />} />
         </Routes>
-      </div> */}
+      </div> */
 
-      <React.Fragment>
+      /* <React.Fragment>
         <Router>
+          <Routes>
+            <Route path='/' element={<Home/>} />
+            <Route path="about" element={<About />} />
+            <Route path="employees/*" element={<Employees token={token} />} />
+            <Route path="store" element={<Store token={token} />} />
+          </Routes>
           <NavigationBar />
         </Router>
-      </React.Fragment>
-    </div>
+      </React.Fragment> */
+
+      
+    //</div>
+
   )
 }
 
