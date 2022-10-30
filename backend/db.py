@@ -1,4 +1,5 @@
 from datetime import datetime
+from tracemalloc import start
 import mysql.connector
 import os
 import time
@@ -48,11 +49,11 @@ def create_db():
     #Create tables
 
     cursor.execute("CREATE TABLE Store(store_id INT NOT NULL AUTO_INCREMENT, store_name varchar(99), store_address varchar(99), PRIMARY KEY(store_id))")
-    cursor.execute("CREATE TABLE Holiday(store_id INT, start_date DATE, end_date DATE, PRIMARY KEY(store_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
+    cursor.execute("CREATE TABLE Holiday(store_id INT, name VARCHAR(40), start_date DATE, end_date DATE, start_time TIME, end_time TIME, PRIMARY KEY(store_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
     cursor.execute("CREATE TABLE Employee(Employee_id INT NOT NULL AUTO_INCREMENT, store_id INT, first_name varchar(40) NOT NULL, last_name varchar(40) NOT NULL, PTO_Days_Rem INT, DOB DATE, PRIMARY KEY(Employee_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
     
     #DOB References Date of Birth for employees. DATE type in mysql is written 'YYYY-MM-DD'
-    cursor.execute("CREATE TABLE TimeOff(Employee_id INT, PTO BOOLEAN, start_date DATE, end_date DATE, PRIMARY KEY(Employee_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
+    cursor.execute("CREATE TABLE TimeOff(Employee_id INT, start_date DATE, end_date DATE, start_time TIME, end_time TIME, total_hours INT, PRIMARY KEY(Employee_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
    
     #Time off table for workers. Careful with BOOLEAN type its actually Binary or the TinyInt type in MYSQL speak
     cursor.execute("CREATE TABLE MondayAvail(Employee_id INT, start_time TIME, end_time TIME, PRIMARY KEY(Employee_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
@@ -227,7 +228,64 @@ class Store:
             employees.append(e)
 
         return employees
-    
+
+    #Set employee time off
+    def set_time_off(self, start_date, end_date, start_time, end_time, employee_id):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("SELECT * FROM Employee WHERE Employee_id = %s", (employee_id))
+        result = cursor.fetchone()
+
+        if not result:
+            log.warning("Invalid Employee id.")
+            #checks if employee exists
+        else:
+            cursor.execute("Insert INTO TimeOff (Employee_id, start_date, end_date, start_time, end_time) VALUES (%s, %s, %s, %s, %s)", (employee_id, start_date, end_date, start_time, end_time))
+            cursor.close()
+            log.warning("Time off successfully added.")
+        return
+
+    #update employee time off
+    def update_time_off(old_start_date, old_end_date, employee_id, new_start_date, new_end_date, start_time, end_time):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("SELECT * FROM TimeOff WHERE Employee_id = %s AND start_date = %s AND end_date = %s", (employee_id, old_start_date, old_end_date))
+        result = cursor.fetchone()
+
+        if not result:
+            log.warning("Invalid input. Either incorrect employee id or time off dates.")
+            #checks if employee exists
+        else:
+            cursor.execute("UPDATE TimeOff SET start_date = %s end_date = %s start_time = %s end_time = %s WHERE Employee_id = %s AND start_date = %s AND end_date = %s", (new_start_date, new_end_date, start_time, end_time, employee_id, old_start_date, old_end_date))
+            cursor.close()
+            log.warning("Time off successfully updated.")
+            
+        return
+
+    def set_holiday(self, name, start_date, end_date, start_time, end_time ):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("INSERT INTO Holiday (store_id, name, start_date, end_date, start_time, end_time) VALUES (%s, %s, %s, %s, %s, %s)", (self.id, name, start_date, end_date, start_time, end_time))
+        #simple execution alterations to this table should be open to MANAGERS ONLY
+        cursor.close()
+        return
+
+    def update_holiday(self, old_name, old_start_date, old_end_date, new_name, new_start_date, new_end_date, start_time, end_time):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("SELECT * FROM Holiday WHERE store_id = %s AND old_start_date = %s AND old_end_date = %s AND old_name = %s", (self.id, old_start_date, old_end_date, old_name))
+        result = cursor.fetchone()
+
+        if not result:
+            log.warning("Invalid input. Either incorrect dates or holiday name")
+            #checks if employee exists
+        else:
+            cursor.execute("UPDATE TimeOff SET name = %s start_date = %s end_date = %s start_time = %s end_time = %s WHERE Employee_id = %s AND start_date = %s AND end_date = %s AND old_name = %s", (new_name, new_start_date, new_end_date, start_time, end_time, self.id, old_start_date, old_end_date, old_name))
+            cursor.close()
+            log.warning("Holiday successfully updated.")
+        return
+
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -269,6 +327,7 @@ class User:
         #Set ID
         self.id = ex
         log.warning("User \"" + username + "\" has been added!")
+
     
     #Gets user with username & password
     def getUserPass(self, username: str, password: str):
@@ -325,7 +384,8 @@ class User:
 
         log.warning("User \"" + self.username + "\" has been updated!")
         return execute("UPDATE User SET store_id = %s WHERE user_id = %s", (self.store.id, self.id))
-    
+
+        
     def to_dict(self):
         return {
             "id": self.id,
