@@ -9,50 +9,52 @@ import 'bootstrap';
 import { BrowserRouter as Router, Route, Switch, Routes, Link } from "react-router-dom";
 import { NavigationBar } from './components/NavigationBar';
 import Store from './components/Store/Store'
-function App() {
-  // const [token, setToken] = useState();
+//import { Home } from './components/Home';
 
-  // if (!token) {
-  //   return <Loginsignup setToken={setToken} />
-  // }
+function App() {
+  const [token, setToken] = useState();
+
+  if (!token) {
+    return <Loginsignup setToken={setToken} />
+  }
 
   return (
 
-    <React.Fragment>
+   /* <React.Fragment>
         <Router>
           <NavigationBar />
         </Router>
-      </React.Fragment>
-    //<div>
-      /* <nav>
-        <Link to="/">Home</Link>
-        <Link to="/employees">Employees</Link>
-        <Link to="/store">Store</Link>
-        <Link to="/about">About</Link>
-      </nav>
-      <div className="wrapper">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="about" element={<About />} />
-          <Route path="employees/*" element={<Employees token={token} />} />
-          <Route path="store" element={<Store token={token} />} />
-        </Routes>
-      </div> */
+      </React.Fragment>*/
+    // <div>
+    //   <nav>
+    //     <Link to="/">Home</Link>
+    //     <Link to="/employees">Employees</Link>
+    //     <Link to="/store">Store</Link>
+    //     <Link to="/about">About</Link>
+    //   </nav>
+    //   <div className="wrapper">
+    //     <Routes>
+    //       <Route path="/" element={<Home />} />
+    //       <Route path="about" element={<About />} />
+    //       <Route path="employees/*" element={<Employees token={token} />} />
+    //       <Route path="store" element={<Store token={token} />} />
+    //     </Routes>
+    //   </div> 
+    // </div>
 
-      /* <React.Fragment>
+     <React.Fragment>
         <Router>
-          <Routes>
-            <Route path='/' element={<Home/>} />
-            <Route path="about" element={<About />} />
-            <Route path="employees/*" element={<Employees token={token} />} />
-            <Route path="store" element={<Store token={token} />} />
-          </Routes>
           <NavigationBar />
+          <div className="wrapper">
+            <Routes>
+              <Route path='/' element={<Home/>} />
+              <Route path="about" element={<About />} />
+              <Route path="employees/*" element={<Employees token={token} />} />
+              <Route path="store" element={<Store token={token} />} />
+            </Routes>
+          </div>
         </Router>
-      </React.Fragment> */
-
-      
-    //</div>
+      </React.Fragment> 
 
   )
 }
