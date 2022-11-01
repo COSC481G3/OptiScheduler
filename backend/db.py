@@ -1,5 +1,4 @@
 from datetime import datetime
-from tracemalloc import start
 import mysql.connector
 import os
 import time
@@ -46,14 +45,12 @@ def create_db():
             return
 
     log.warning("DB not found, creating...")
-    #Create tables
-
-    cursor.execute("CREATE TABLE Store(store_id INT NOT NULL AUTO_INCREMENT, store_name varchar(99), store_address varchar(99), PRIMARY KEY(store_id))")
-    cursor.execute("CREATE TABLE Holiday(store_id INT, name VARCHAR(40), start_date DATE, end_date DATE, start_time TIME, end_time TIME, PRIMARY KEY(store_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
-    cursor.execute("CREATE TABLE Employee(Employee_id INT NOT NULL AUTO_INCREMENT, store_id INT, first_name varchar(40) NOT NULL, last_name varchar(40) NOT NULL, PTO_Days_Rem INT, DOB DATE, PRIMARY KEY(Employee_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
     
-    #DOB References Date of Birth for employees. DATE type in mysql is written 'YYYY-MM-DD'
-    cursor.execute("CREATE TABLE TimeOff(Employee_id INT, start_date DATE, end_date DATE, start_time TIME, end_time TIME, total_hours INT, PRIMARY KEY(Employee_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
+    #Create tables
+    cursor.execute("CREATE TABLE Store(store_id INT NOT NULL AUTO_INCREMENT, store_name varchar(99), store_address varchar(99), PRIMARY KEY(store_id))")
+    cursor.execute("CREATE TABLE Holiday(holiday_id INT NOT NULL AUTO_INCREMENT, store_id INT, name VARCHAR(40), start DATETIME, end DATETIME, PRIMARY KEY(holiday_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
+    cursor.execute("CREATE TABLE Employee(Employee_id INT NOT NULL AUTO_INCREMENT, store_id INT, first_name varchar(40) NOT NULL, last_name varchar(40) NOT NULL, PTO_Days_Rem INT, DOB DATE, PRIMARY KEY(Employee_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
+    cursor.execute("CREATE TABLE TimeOff(timeoff_id INT NOT NULL AUTO_INCREMENT, Employee_id INT, start DATETIME, end DATETIME, hours INT, PRIMARY KEY(timeoff_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
    
     #Time off table for workers. Careful with BOOLEAN type its actually Binary or the TinyInt type in MYSQL speak
     cursor.execute("CREATE TABLE MondayAvail(Employee_id INT, start_time TIME, end_time TIME, PRIMARY KEY(Employee_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
@@ -102,6 +99,133 @@ def execute(query: str, params: tuple, returnID: bool = False):
     if(returnID):
         return id
 
+class TimeOff:
+    #Add timeoff to db
+    def add(self, emp_id: str, start: datetime, end: datetime):
+        self.emp_id = emp_id
+        self.start = start
+        self.end = end
+        #Get hours off
+        duration = end - start
+        self.hours = divmod(duration.total_seconds(), 3600)[0]
+
+        #Insert into db
+        ex = execute("INSERT INTO TimeOff (Employee_id, start, end, hours) VALUES (%s, %s, %s, %s)", (emp_id, start, end, self.hours), True)
+        if(ex == "Database error."):
+            return ex
+        
+        self.id = ex
+        log.warning("TimeOff \"" + str(self.id) + "\" has been added!")
+    
+    #Get timeoff w/ id
+    def get(self, id: str):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("SELECT * FROM TimeOff WHERE timeoff_id = %s", (id, ))
+        result = cursor.fetchone()
+        cursor.close()
+
+        if(result):
+            self.id = result[0]
+            self.emp_id = result[1]
+            self.start = result[2]
+            self.end = result[3]
+            self.hours = result[4]
+        else:
+            return "Could not find TimeOff."
+    
+    #Set timeoff with optional values
+    def set(self, start: datetime = None, end: datetime = None):
+        if(not self.id):
+            return("Cannot set before init!")
+        
+        if(start):
+            self.start = start
+        if(end):
+            self.end = end
+        if(start or end):
+            duration = end - start
+            self.hours = divmod(duration.total_seconds(), 3600)[0]
+        
+        log.warning("TimeOff \"" + str(self.id) + "\" has been updated!")
+        return execute("UPDATE TimeOff SET start = %s, end = %s, hours = %s WHERE timeoff_id = %s", (self.start, self.end, self.hours, self.id))
+    
+    #Delete timeoff from db
+    def delete(self):
+        log.warning("TimeOff \"" + str(self.id) + "\" has been deleted!")
+        return execute("DELETE FROM TimeOff WHERE timeoff_id = %s", (self.id, ))
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "emp_id": self.emp_id,
+            "start": self.start,
+            "end": self.end,
+            "hours": self.hours
+        }
+
+class Holiday:
+    #Add holiday to db
+    def add(self, store_id: str, name: str, start: datetime, end: datetime):
+        self.store_id = store_id
+        self.name = name
+        self.start = start
+        self.end = end
+
+        #Insert into db
+        ex = execute("INSERT INTO Holiday (store_id, name, start, end) VALUES (%s, %s, %s, %s)", (store_id, name, start, end), True)
+        if(ex == "Database error."):
+            return ex
+        
+        self.id = ex
+        log.warning("Holiday \"" + name + "\" has been added!")
+    
+    #Get holiday w/ id
+    def get(self, id: str):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("SELECT * FROM Holiday WHERE holiday_id = %s", (id, ))
+        result = cursor.fetchone()
+        cursor.close()
+
+        if(result):
+            self.id = result[0]
+            self.store_id = result[1]
+            self.name = result[2]
+            self.start = result[3]
+            self.end = result[4]
+        else:
+            return "Could not find Holiday."
+    
+    #Set holiday with optional values
+    def set(self, name: str = None, start: datetime = None, end: datetime = None):
+        if(not self.id):
+            return("Cannot set before init!")
+        
+        if(name):
+            self.name = name
+        if(start):
+            self.start = start
+        if(end):
+            self.end = end
+        
+        log.warning("Holiday \"" + self.name + "\" has been updated!")
+        return execute("UPDATE Holiday SET name = %s, start = %s, end = %s WHERE holiday_id = %s", (self.name, self.start, self.end, self.id))
+    
+    #Delete holiday from db
+    def delete(self):
+        log.warning("Employee \"" + self.name + "\" has been deleted!")
+        return execute("DELETE FROM Holiday WHERE holiday_id = %s", (self.id, ))
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "store_id": self.store_id,
+            "name": self.name,
+            "start": self.start,
+            "end": self.end
+        }
+
 class Employee:
     #Add employee
     def add(self, store_id: str, first_name: str, last_name: str, PTO_Days_Rem: int = 0, DOB: str = '2000-01-01'):
@@ -139,8 +263,8 @@ class Employee:
         
     #Set optional employee data
     def set(self, first_name: str = None, last_name: str = None, PTO_Days_Rem: int = None, DOB: str = None):
-        if(not self.first_name):
-            return "Cannot set before initialization!"
+        if(not self.id):
+            return "Cannot set before init!"
 
         if(first_name):
             self.first_name = first_name
@@ -158,6 +282,23 @@ class Employee:
     def delete(self):
         log.warning("Employee \"" + self.first_name + "\" has been deleted!")
         return execute("DELETE FROM Employee WHERE Employee_id = %s", (self.id, ))
+    
+    #Get all timeoff for employee
+    def getTimeOff(self):
+        db.ping(True)
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM TimeOff WHERE Employee_id = %s", (self.id, ))
+        result = cursor.fetchall()
+        cursor.close()
+        timeoffs = []
+
+        #Cycles through all matching holidays in db, appends them to list
+        for timeoff in result:
+            t = TimeOff()
+            t.get(timeoff[0])
+            timeoffs.append(t)
+
+        return timeoffs
         
     def to_dict(self):
         return {
@@ -201,8 +342,8 @@ class Store:
     
     #Set store with optional values name, address
     def set(self, name: str = None, address: str = None):
-        if(not self.name):
-            return "Cannot set name before initialization!"
+        if(not self.id):
+            return "Cannot set name before init!"
         
         if(name):
             self.name = name
@@ -228,63 +369,23 @@ class Store:
             employees.append(e)
 
         return employees
-
-    #Set employee time off
-    def set_time_off(self, start_date, end_date, start_time, end_time, employee_id):
+    
+    #Get all holidays for store
+    def getHolidays(self):
         db.ping(True)
-        cursor = db.cursor(buffered=True)
-        cursor.execute("SELECT * FROM Employee WHERE Employee_id = %s", (employee_id))
-        result = cursor.fetchone()
-
-        if not result:
-            log.warning("Invalid Employee id.")
-            #checks if employee exists
-        else:
-            cursor.execute("Insert INTO TimeOff (Employee_id, start_date, end_date, start_time, end_time) VALUES (%s, %s, %s, %s, %s)", (employee_id, start_date, end_date, start_time, end_time))
-            cursor.close()
-            log.warning("Time off successfully added.")
-        return
-
-    #update employee time off
-    def update_time_off(old_start_date, old_end_date, employee_id, new_start_date, new_end_date, start_time, end_time):
-        db.ping(True)
-        cursor = db.cursor(buffered=True)
-        cursor.execute("SELECT * FROM TimeOff WHERE Employee_id = %s AND start_date = %s AND end_date = %s", (employee_id, old_start_date, old_end_date))
-        result = cursor.fetchone()
-
-        if not result:
-            log.warning("Invalid input. Either incorrect employee id or time off dates.")
-            #checks if employee exists
-        else:
-            cursor.execute("UPDATE TimeOff SET start_date = %s end_date = %s start_time = %s end_time = %s WHERE Employee_id = %s AND start_date = %s AND end_date = %s", (new_start_date, new_end_date, start_time, end_time, employee_id, old_start_date, old_end_date))
-            cursor.close()
-            log.warning("Time off successfully updated.")
-            
-        return
-
-    def set_holiday(self, name, start_date, end_date, start_time, end_time ):
-        db.ping(True)
-        cursor = db.cursor(buffered=True)
-        cursor.execute("INSERT INTO Holiday (store_id, name, start_date, end_date, start_time, end_time) VALUES (%s, %s, %s, %s, %s, %s)", (self.id, name, start_date, end_date, start_time, end_time))
-        #simple execution alterations to this table should be open to MANAGERS ONLY
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM Holiday WHERE store_id = %s", (self.id, ))
+        result = cursor.fetchall()
         cursor.close()
-        return
+        holidays = []
 
-    def update_holiday(self, old_name, old_start_date, old_end_date, new_name, new_start_date, new_end_date, start_time, end_time):
-        db.ping(True)
-        cursor = db.cursor(buffered=True)
-        cursor.execute("SELECT * FROM Holiday WHERE store_id = %s AND old_start_date = %s AND old_end_date = %s AND old_name = %s", (self.id, old_start_date, old_end_date, old_name))
-        result = cursor.fetchone()
+        #Cycles through all matching holidays in db, appends them to list
+        for holiday in result:
+            h = Holiday()
+            h.get(holiday[0])
+            holidays.append(h)
 
-        if not result:
-            log.warning("Invalid input. Either incorrect dates or holiday name")
-            #checks if employee exists
-        else:
-            cursor.execute("UPDATE TimeOff SET name = %s start_date = %s end_date = %s start_time = %s end_time = %s WHERE Employee_id = %s AND start_date = %s AND end_date = %s AND old_name = %s", (new_name, new_start_date, new_end_date, start_time, end_time, self.id, old_start_date, old_end_date, old_name))
-            cursor.close()
-            log.warning("Holiday successfully updated.")
-        return
-
+        return holidays
 
     def to_dict(self):
         return {
@@ -378,7 +479,7 @@ class User:
     #Changes store associated with user
     def setStore(self, store: Store):
         if(not self.store):
-            return "Cannot set store before initialization!"
+            return "Cannot set store before init!"
         
         self.store = store
 
