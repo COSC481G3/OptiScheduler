@@ -387,6 +387,31 @@ class Store:
 
         return holidays
 
+    def setHours(self, dayOfWeek: str, start_time: datetime, end_time: datetime):
+        db.ping(True)
+        cursor = db.cursor()
+        day = dayOfWeek[0].upper() + dayOfWeek[1:(len(dayOfWeek))] + "Hours"
+        #fix string format for day of week set first letter capital rest lower.
+        cursor.execute("INSERT INTO %s(store_id, open_time, close_time) VALUES (%s, %s, %s)", (day, self.id, start_time, end_time))
+        cursor.close()
+        #I don't quite understand what Trev has been doing to check initalization of these values so i wont try and replicate but work your magic here if you see.
+        return
+
+    def deleteHours(self, dayOfWeek: str, start_time: datetime, end_time: datetime):
+        db.ping(True)
+        cursor = db.cursor()
+        day = dayOfWeek[0].upper() + dayOfWeek[1:(len(dayOfWeek))] + "Hours"
+        #fix string format for day of week set first letter capital rest lower.
+        result = cursor.execute("SELECT * FROM %s WHERE store_id = %s", (day, self.id))
+        if(result):
+            log.warning(day + " for store " + self.name + "\" has been deleted!")
+            return execute("DELETE FROM %s WHERE store_id = %s", (day, self.id))
+        else:
+            log.warning("No hours have been set fo this day")
+        cursor.close()
+        
+        return
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -485,6 +510,34 @@ class User:
 
         log.warning("User \"" + self.username + "\" has been updated!")
         return execute("UPDATE User SET store_id = %s WHERE user_id = %s", (self.store.id, self.id))
+
+    
+
+
+    def setHours(self, dayOfWeek: str, start_time: datetime, end_time: datetime):
+        db.ping(True)
+        cursor = db.cursor()
+        day = dayOfWeek[0].upper() + dayOfWeek[1:(len(dayOfWeek))] + "Avail"
+        #fix string format for day of week set first letter capital rest lower.
+        cursor.execute("INSERT INTO %s(Employee_id, start_time, end_time) VALUES (%s, %s, %s)", (day, self.id, start_time, end_time))
+        cursor.close()
+
+        return
+
+    def deleteHours(self, dayOfWeek: str, start_time: datetime, end_time: datetime):
+        db.ping(True)
+        cursor = db.cursor()
+        day = dayOfWeek[0].upper() + dayOfWeek[1:(len(dayOfWeek))] + "Hours"
+        #fix string format for day of week set first letter capital rest lower.
+        result = cursor.execute("SELECT * FROM %s WHERE Employee_id = %s", (day, self.id))
+        if(result):
+            log.warning(day + " for Employee " + self.username + "\" has been deleted!")
+            return execute("DELETE FROM %s WHERE Employee_id = %s", (day, self.id))
+        else:
+            log.warning("No hours have been set fo this day")
+        cursor.close()
+        
+        return
 
         
     def to_dict(self):
