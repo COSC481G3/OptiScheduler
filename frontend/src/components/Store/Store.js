@@ -63,7 +63,7 @@ export default function Store({ token }){
 
     return (
         <>
-            <main className="store-wrapper">
+            <main id="store" className="store-wrapper">
                 <form onSubmit={handleSubmit}>
                     <h3>Store</h3>
                     <label>

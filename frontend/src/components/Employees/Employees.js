@@ -88,7 +88,7 @@ function ListEmployees({ token }) {
 
     return (
         <>
-            <main>
+            <main id="employee">
                 <h2>Employees</h2>
                 <input type="text" placeholder="Search" className="search" onChange={e => setSearch(e.target.value)}></input>
                 {employees && employees.filter(employee => employee.first_name.includes(search) || employee.last_name.includes(search)).map(data => (
