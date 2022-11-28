@@ -27,10 +27,3 @@ nav a:hover {
   text-decoration: none;
   color: white;
 }
-
-#home #nav_home a,
-#employee #nav_emp a,
-#store #nav_store a,
-#about #nav_about a {
-  color:#d50000
-}

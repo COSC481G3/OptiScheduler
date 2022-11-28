@@ -22,10 +22,10 @@ function App() {
       </nav>
       <div className="wrapper">
         <Routes>
-          <Route id="nav_home" path="/" element={<Home />} />
-          <Route id="nav_about" path="about" element={<About />} />
-          <Route id="nav_emp" path="employees/*" element={<Employees token={token} />} />
-          <Route id="nav_store" path="store" element={<Store token={token} />} />
+          <Route path="/" element={<Home />} />
+          <Route path="about" element={<About />} />
+          <Route path="employees/*" element={<Employees token={token} />} />
+          <Route path="store" element={<Store token={token} />} />
         </Routes>
       </div>
     </div>
