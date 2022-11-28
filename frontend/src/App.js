@@ -51,7 +51,7 @@ function Home() {
 
   return (
     <>
-      <main>
+      <main id="home">
         <h2>Welcome to the homepage friend! :)</h2>
         <p>Here's some data retrieved from the backend:</p>
         <><p>{data.name}</p><p>{data.response}</p></>
@@ -64,7 +64,7 @@ function Home() {
 function About() {
   return (
     <>
-      <main>
+      <main id="about">
         <h2>Who are we?</h2>
         <p>We are group 3!</p>
       </main>

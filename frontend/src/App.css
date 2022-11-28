@@ -24,5 +24,6 @@ nav a {
 
 nav a:hover {
   background-color: #d50000;
+  text-decoration: none;
   color: white;
 }
