@@ -14,7 +14,7 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
-# localhost:5000/api/hello
+# /api/hello
 @app.route('/api/hello')
 @limiter.exempt
 def hello_world():
@@ -24,7 +24,7 @@ def hello_world():
         "response": "Hello, world! :)"
     }
 
-# localhost:5000/api/addUser?username=X&password=X
+# /api/addUser?username=X&password=X
 @app.route('/api/addUser', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def addUser():
@@ -54,7 +54,7 @@ def addUser():
             "success": "Successfully added user."
         }
 
-# localhost:5000/api/getToken?username=X&password=X
+# /api/getToken?username=X&password=X
 @app.route('/api/getToken', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getToken():
@@ -84,7 +84,7 @@ def getToken():
             "token": user.token
         }
 
-# localhost:5000/api/getUser?token=X
+# /api/getUser?token=X
 @app.route('/api/getUser', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getUser():
@@ -110,7 +110,7 @@ def getUser():
     else:
         return json.dumps(user.to_dict())
 
-# localhost:5000/api/getStore?token=X
+# /api/getStore?token=X
 @app.route('/api/getStore', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getStore():
@@ -136,7 +136,7 @@ def getStore():
     else:
         return json.dumps(user.store.to_dict())
 
-# localhost:5000/api/setStore?token=X&store_name=X&store_address=X
+# /api/setStore?token=X&store_name=X&store_address=X
 @app.route('/api/setStore', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def setStoreName():
@@ -175,7 +175,7 @@ def setStoreName():
             "success": "Successfully updated store."
         }
 
-# localhost:5000/api/addEmployee?token=X&firstname=X&lastname=X
+# /api/addEmployee?token=X&firstname=X&lastname=X
 @app.route('/api/addEmployee', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def addEmployee():
@@ -215,7 +215,7 @@ def addEmployee():
             "success": "Successfully added employee."
         }
 
-# localhost:5000/api/getEmployee?token=X&emp_id=X
+# /api/getEmployee?token=X&emp_id=X
 @app.route('/api/getEmployee', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getEmployee():
@@ -251,7 +251,7 @@ def getEmployee():
     else:
         return json.dumps(emp.to_dict(), default=str)
 
-# localhost:5000/api/getEmployees?token=X
+# /api/getEmployees?token=X
 @app.route('/api/getEmployees', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getEmployees():
@@ -279,7 +279,7 @@ def getEmployees():
     employees = [emp.to_dict() for emp in user.store.getEmployees()]
     return json.dumps({"employees": employees}, default=str)
 
-# localhost:5000/api/setEmployee?token=X&emp_id=X&first_name=X
+# /api/setEmployee?token=X&emp_id=X&first_name=X
 @app.route('/api/setEmployee', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def setEmployee():
@@ -332,7 +332,7 @@ def setEmployee():
             "success": "Successfully added employee."
         }
 
-# localhost:5000/api/deleteEmployee?token=X
+# /api/deleteEmployee?token=X
 @app.route('/api/deleteEmployee', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def deleteEmployee():
@@ -377,7 +377,7 @@ def deleteEmployee():
             "success": "Successfully deleted employee."
         }
 
-# localhost:5000/api/addTimeOff?token=X&name=X&start=X&end=X
+# /api/addTimeOff?token=X&name=X&start=X&end=X
 # start and end should be in ISO8601 date format
 @app.route('/api/addTimeOff', methods=['GET', 'POST'])
 @limiter.limit("1/second")
@@ -437,7 +437,7 @@ def addTimeOff():
             "success": "Successfully added timeoff."
         }
 
-# localhost:5000/api/getTimeOff?token=X&timeoff_id=X
+# /api/getTimeOff?token=X&timeoff_id=X
 @app.route('/api/getTimeOff', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getTimeOff():
@@ -473,7 +473,7 @@ def getTimeOff():
     else:
         return json.dumps(timeoff.to_dict(), default=str)
 
-# localhost:5000/api/getTimeOffs?token=X&emp_id=X
+# /api/getTimeOffs?token=X&emp_id=X
 @app.route('/api/getTimeOffs', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getTimeOffs():
@@ -511,7 +511,7 @@ def getTimeOffs():
     timeoffs = [timeoff.to_dict() for timeoff in emp.getTimeOff()]
     return json.dumps({"timeoffs": timeoffs}, default=str)
 
-# localhost:5000/api/deleteTimeOff?token=X&timeoff_id=X
+# /api/deleteTimeOff?token=X&timeoff_id=X
 @app.route('/api/deleteTimeOff', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def deleteTimeOff():
@@ -556,7 +556,7 @@ def deleteTimeOff():
             "success": "Successfully deleted holiday."
         }
 
-# localhost:5000/api/addHoliday?token=X&name=X&start=X&end=X
+# /api/addHoliday?token=X&name=X&start=X&end=X
 # start and end should be in ISO8601 date format
 @app.route('/api/addHoliday', methods=['GET', 'POST'])
 @limiter.limit("1/second")
@@ -608,7 +608,7 @@ def addHoliday():
             "success": "Successfully added holiday."
         }
 
-# localhost:5000/api/getHoliday?token=X&hol_id=X
+# /api/getHoliday?token=X&hol_id=X
 @app.route('/api/getHoliday', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getHoliday():
@@ -644,7 +644,7 @@ def getHoliday():
     else:
         return json.dumps(hol.to_dict(), default=str)
 
-# localhost:5000/api/getHolidays?token=X
+# /api/getHolidays?token=X
 @app.route('/api/getHolidays', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def getHolidays():
@@ -672,7 +672,7 @@ def getHolidays():
     holidays = [hol.to_dict() for hol in user.store.getHolidays()]
     return json.dumps({"holidays": holidays}, default=str)
 
-# localhost:5000/api/deleteHoliday?token=X&hol_id=X
+# /api/deleteHoliday?token=X&hol_id=X
 @app.route('/api/deleteHoliday', methods=['GET', 'POST'])
 @limiter.limit("1/second")
 def deleteHoliday():
@@ -715,6 +715,360 @@ def deleteHoliday():
     else:
         return {
             "success": "Successfully deleted holiday."
+        }
+
+# /api/addHours?token=X&day=X&open_time=X&close_time=X
+@app.route('/api/addHours', methods=['GET', 'POST'])
+def addHours():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        day = request.args.get('day')
+        open_time = request.args.get('open_time')
+        close_time = request.args.get('close_time')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        day = jsonres.get('day')
+        open_time = jsonres.get('open_time')
+        close_time = jsonres.get('close_time')
+    if(token is None or day is None or open_time is None or close_time is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Format date
+    try:
+        open_time = datetime.fromisoformat(open_time)
+        close_time = datetime.fromisoformat(close_time)
+    except ValueError:
+        return {
+            "error": "start & end must be in ISO8601!"
+        }
+    
+    #Add hours
+    holiday = db.Hours()
+    err = holiday.add(user.store.id, day, open_time, close_time)
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully added hours."
+        }
+
+# /api/getHours?token=X
+@app.route('/api/getHours', methods=['GET', 'POST'])
+def getHours():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+    if(token is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get hours
+    hours = [hour.to_dict() for hour in user.store.getHours()]
+    return json.dumps({"hours": hours}, default=str)
+
+# /api/setHours?token=X&day=X&open_time=X&close_time=X
+@app.route('/api/setHours', methods=['GET', 'POST'])
+def setHours():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        day = request.args.get('day')
+        open_time = request.args.get('open_time')
+        close_time = request.args.get('close_time')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        day = jsonres.get('day')
+        open_time = jsonres.get('open_time')
+        close_time = jsonres.get('close_time')
+    if(token is None or day is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Format date
+    try:
+        if(open_time):
+            open_time = datetime.fromisoformat(open_time)
+        if(close_time):
+            close_time = datetime.fromisoformat(close_time)
+    except ValueError:
+        return {
+            "error": "start & end must be in ISO8601!"
+        }
+    
+    #Set hours
+    hours = db.Hours().get(user.store.id, day)
+    err = hours.set(open_time, close_time)
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully updated hours."
+        }
+
+# /api/deleteHours?token=X&day=X
+@app.route('/api/deleteHours', methods=['GET, POST'])
+def deleteHours():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        day = request.args.get('day')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        day = jsonres.get('day')
+    if(token is None or day is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get hours
+    hour = db.Hours()
+    err = hour.get(user.store.id, day)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Delete hours
+    err = hour.delete()
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully deleted hours."
+        }
+
+# /api/addAvailability?token=X&emp_id=X&day=X&start_time=X&end_time=X
+@app.route('/api/addAvailability', methods=['GET', 'POST'])
+def addAvailability():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        emp_id = request.args.get('emp_id')
+        day = request.args.get('day')
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        emp_id = jsonres.get('emp_id')
+        day = jsonres.get('day')
+        start_time = jsonres.get('start_time')
+        end_time = jsonres.get('end_time')
+    if(token is None or emp_id is None or day is None or start_time is None or end_time is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Format date
+    try:
+        start_time = datetime.fromisoformat(start_time)
+        end_time = datetime.fromisoformat(end_time)
+    except ValueError:
+        return {
+            "error": "start & end must be in ISO8601!"
+        }
+    
+    #Add availability
+    avail = db.Availability()
+    err = avail.add(emp_id, day, start_time, end_time)
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully added availability."
+        }
+
+# /api/getAvailability?token=X&emp_id=X
+@app.route('/api/getAvailability', methods=['GET', 'POST'])
+def getAvailability():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        emp_id = request.args.get('emp_id')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        emp_id = jsonres.get('emp_id')
+    if(token is None or emp_id is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get employee
+    employee = db.Employee()
+    err = employee.get(emp_id)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get availability
+    availabilities = [ava.to_dict() for ava in employee.getAvailability()]
+    return json.dumps({"availability": availabilities}, default=str)
+
+# /api/setAvailability?token=X&emp_id=X&day=X&start_time=X&end_time=X
+@app.route('/api/setAvailability', methods=['GET', 'POST'])
+def setAvailability():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        emp_id = request.args.get('emp_id')
+        day = request.args.get('day')
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        emp_id = jsonres.get('emp_id')
+        day = jsonres.get('day')
+        start_time = jsonres.get('start_time')
+        end_time = jsonres.get('end_time')
+    if(token is None or day is None or emp_id is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Format date
+    try:
+        if(start_time):
+            start_time = datetime.fromisoformat(start_time)
+        if(end_time):
+            end_time = datetime.fromisoformat(end_time)
+    except ValueError:
+        return {
+            "error": "start & end must be in ISO8601!"
+        }
+    
+    #Set availability
+    avail = db.Availability().get(emp_id, day)
+    err = avail.set(start_time, end_time)
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully set availability."
+        }
+
+# /api/deleteAvailability?token=X&emp_id=X&day=X
+@app.route('/api/deleteAvailability', methods=['GET, POST'])
+def deleteAvailability():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        emp_id = request.args.get('emp_id')
+        day = request.args.get('day')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        emp_id = jsonres.get('emp_id')
+        day = jsonres.get('day')
+    if(token is None or emp_id is None or day is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get availability
+    avail = db.Availability()
+    err = avail.get(emp_id, day)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Delete hours
+    err = avail.delete()
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully deleted availability."
         }
 
 # Returns the static content for production deployment
