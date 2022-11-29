@@ -56,19 +56,24 @@ function Home({ token }) {
     ).then(
       data => {
         console.log(data);
-        setAvail(data["availability"]);
+
+        if (typeof data.error !== 'undefined') {
+          console.log(data.error);
+        } else {
+          setAvail(data["availability"]);
+        }
       }
     )
   }, [token, date])
 
-  function formatTime(time){
+  function formatTime(time) {
     let hours = time.split(':')[0]
     let minutes = time.split(':')[1]
 
-    let suffix = (hours >= 12)? 'pm' : 'am';
-    hours = (hours > 12)? hours - 12 : hours;
-    hours = (hours === '00')? 12: hours;
-    
+    let suffix = (hours >= 12) ? 'pm' : 'am';
+    hours = (hours > 12) ? hours - 12 : hours;
+    hours = (hours === '00') ? 12 : hours;
+
     return hours + ":" + minutes + suffix;
   }
 
@@ -82,7 +87,7 @@ function Home({ token }) {
             <div className="name">{data.first_name} {data.last_name}</div>
             <div className="left">
               <div className="start">
-                {formatTime(data.start_time)} - 
+                {formatTime(data.start_time)} -
               </div>
               <div className="end">
                 {formatTime(data.end_time)}
