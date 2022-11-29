@@ -185,11 +185,15 @@ def addEmployee():
         token = request.args.get('token')
         firstname = request.args.get('firstname')
         lastname = request.args.get('lastname')
+        pto = request.args.get('PTO_Days_Rem')
+        dob = request.args.get('DOB')
     elif request.method == 'POST':
         jsonres = request.get_json()
         token = jsonres.get('token')
         firstname = jsonres.get('first_name')
         lastname = jsonres.get('last_name')
+        pto = jsonres.get('PTO_Days_Rem')
+        dob = jsonres.get('DOB')
     if(token is None or firstname is None or lastname is None):
         return {
             "error": "Value cannot be null!"
@@ -203,9 +207,26 @@ def addEmployee():
             "error": err
         }
     
+    #Format date
+    try:
+        if(dob):
+            dob = datetime.fromisoformat(dob)
+    except ValueError:
+        return {
+            "error": "dob must be in ISO8601!"
+        }
+    
+    #Convert to int
+    try:
+        pto = int(pto)
+    except TypeError:
+        return {
+            "error": "PTO must be a number!"
+        }
+    
     #Add employee
     employee = db.Employee()
-    err = employee.add(user.store.id, firstname, lastname)
+    err = employee.add(user.store.id, firstname, lastname, pto, dob)
     if(err):
         return {
             "error": err
@@ -290,16 +311,16 @@ def setEmployee():
         id = request.args.get('emp_id')
         firstname = request.args.get('first_name')
         lastname = request.args.get('last_name')
-        pto = request.args.get('pto')
-        dob = request.args.get('dob')
+        pto = request.args.get('PTO_Days_Rem')
+        dob = request.args.get('DOB')
     elif request.method == 'POST':
         jsonres = request.get_json()
         token = jsonres.get('token')
         id = jsonres.get('emp_id')
         firstname = jsonres.get('first_name')
         lastname = jsonres.get('last_name')
-        pto = jsonres.get('pto')
-        dob = jsonres.get('dob')
+        pto = jsonres.get('PTO_Days_Rem')
+        dob = jsonres.get('DOB')
     if(token is None or id is None):
         return {
             "error": "Value cannot be null!"
@@ -745,18 +766,22 @@ def addHours():
             "error": err
         }
     
-    #Format date
-    try:
-        open_time = datetime.fromisoformat(open_time)
-        close_time = datetime.fromisoformat(close_time)
-    except ValueError:
-        return {
-            "error": "start & end must be in ISO8601!"
-        }
+    #Get hours
+    hours = db.Hours()
+    err = hours.get(user.store.id, day)
+    if(not err):
+        err = hours.set(open_time, close_time)
+        if(err):
+            return {
+                "error": err
+            }
+        else:
+            return {
+                "success": "Successfully updated hours."
+            }
     
     #Add hours
-    holiday = db.Hours()
-    err = holiday.add(user.store.id, day, open_time, close_time)
+    err = hours.add(user.store.id, day, open_time, close_time)
     if(err):
         return {
             "error": err
@@ -831,8 +856,15 @@ def setHours():
             "error": "start & end must be in ISO8601!"
         }
     
+    #Get hours
+    hours = db.Hours()
+    err = hours.get(user.store.id, day)
+    if(err):
+        return {
+            "error": "Hours not yet added!"
+        }
+    
     #Set hours
-    hours = db.Hours().get(user.store.id, day)
     err = hours.set(open_time, close_time)
     if(err):
         return {
@@ -916,17 +948,19 @@ def addAvailability():
             "error": err
         }
     
-    #Format date
-    try:
-        start_time = datetime.fromisoformat(start_time)
-        end_time = datetime.fromisoformat(end_time)
-    except ValueError:
-        return {
-            "error": "start & end must be in ISO8601!"
-        }
+    #Get availability
+    avail = db.Availability()
+    err = avail.get(emp_id, day)
+    if(not err):
+        err = avail.set(start_time, end_time)
+        if(err):
+            return err
+        else:
+            return {
+                "success": "Successfully updated availability"
+            }
     
     #Add availability
-    avail = db.Availability()
     err = avail.add(emp_id, day, start_time, end_time)
     if(err):
         return {
@@ -1013,9 +1047,16 @@ def setAvailability():
         return {
             "error": "start & end must be in ISO8601!"
         }
+
+    #Get availability
+    avail = db.Availability()
+    err = avail.get(emp_id, day)
+    if(err):
+        return {
+            "error": "Availability not yet added!"
+        }
     
     #Set availability
-    avail = db.Availability().get(emp_id, day)
     err = avail.set(start_time, end_time)
     if(err):
         return {
@@ -1070,6 +1111,75 @@ def deleteAvailability():
         return {
             "success": "Successfully deleted availability."
         }
+
+@app.route('/api/getSchedule', methods=['GET', 'POST'])
+def getSchedule():
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        day = request.args.get('day')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        day = jsonres.get('day')
+    if(token is None or day is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Convert day (int) to day (string)
+    if(day == 0):
+        day = "Sunday"
+    elif(day == 1):
+        day = "Monday"
+    elif(day == 2):
+        day = "Tuesday"
+    elif(day == 3):
+        day = "Wednesday"
+    elif(day == 4):
+        day = "Thursday"
+    elif(day == 5):
+        day = "Friday"
+    elif(day == 6):
+        day = "Saturday"
+
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get hours
+    hours = user.store.getHours(day)
+    if(not hours):
+        return {
+            "error": "Hours not yet set!"
+        }
+
+    #Get employees
+    employees = user.store.getEmployees()
+
+    #Get availability
+    avail_list = []
+    for emp in employees:
+        avail = emp.getAvailability(day)
+        if(avail):
+            avail.first_name = emp.first_name
+            avail.last_name = emp.last_name
+
+            if(avail.start_time < hours.open_time):
+                avail.start_time = hours.open_time
+            if(avail.end_time > hours.close_time):
+                avail.end_time = hours.close_time
+
+            avail_list.append(avail)
+    
+    avail_list.sort(key=lambda x: x.start_time)
+    
+    availabilities = [ava.to_dict() for ava in avail_list]
+    return json.dumps({"availability": availabilities}, default=str)
 
 # Returns the static content for production deployment
 @app.route('/', defaults={'path': ''})

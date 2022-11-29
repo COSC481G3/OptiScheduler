@@ -31,7 +31,6 @@
 }
 
 .emp-wrapper form{
-    height: 520px;
     width: 400px;
     /*background-color: rgba(255, 255, 255, 0);*/
     background-color: #212121;
@@ -79,6 +78,28 @@
     margin-top: 8px;
     font-size: 14px;
     font-weight: 300;
+}
+
+.emp-wrapper form select{
+    display: block;
+    height: 50px;
+    width: 100%;
+    background-color: rgba(255,255,255,0.10);
+    color: #ffffff;
+    border-radius: 3px;
+    padding: 0 10px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.emp-wrapper form select option{
+    background-color: rgba(255,255,255,0.10);
+    color: black;
+}
+
+.emp-wrapper .avail form {
+    transform: translate(-50%,-22%);
 }
 
 .emp-wrapper form button{

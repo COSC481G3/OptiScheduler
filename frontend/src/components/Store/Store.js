@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import './Store.css'
 
 async function setStore(credentials) {
@@ -11,7 +12,28 @@ async function setStore(credentials) {
     }).then(res => res.json())
 }
 
-export default function Store({ token }){
+async function addHours(credentials) {
+    return fetch('/api/addHours', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+    }).then(res => res.json())
+}
+
+export default function Store({ token }) {
+    return (
+        <div className="store-wrapper">
+            <Routes>
+                <Route path="/" element={<StoreDetails token={token} />} />
+                <Route path="/hours" element={<StoreHours token={token} />} />
+            </Routes>
+        </div>
+    )
+}
+
+function StoreDetails({ token }){
     const [store_name, setStoreName] = useState();
     const [store_address, setStoreAddress] = useState();
 
@@ -41,7 +63,7 @@ export default function Store({ token }){
 
                 console.log(data);
             }
-        )
+        );
     }, [token])
 
     const handleSubmit = async e => {
@@ -63,7 +85,7 @@ export default function Store({ token }){
 
     return (
         <>
-            <main id="store" className="store-wrapper">
+            <main id="store">
                 <form onSubmit={handleSubmit}>
                     <h3>Store</h3>
                     <label>
@@ -75,7 +97,205 @@ export default function Store({ token }){
                     </label>
                     <input type="text" placeholder="Store Address" value={store_address} onChange={e => setStoreAddress(e.target.value)} />
                     <button type="submit" id="submit">Submit</button>
+                    <Link className="altbutton" to="/store/hours" state={{ store_name }}>Edit Hours</Link>
                 </form>
+            </main>
+        </>
+    )
+}
+
+function StoreHours({ token }) {
+    const [store_name, setStoreName] = useState();
+
+    const [monStart, setMonStart] = useState();
+    const [monEnd, setMonEnd] = useState();
+    const [tueStart, setTueStart] = useState();
+    const [tueEnd, setTueEnd] = useState();
+    const [wedStart, setWedStart] = useState();
+    const [wedEnd, setWedEnd] = useState();
+    const [thuStart, setThuStart] = useState();
+    const [thuEnd, setThuEnd] = useState();
+    const [friStart, setFriStart] = useState();
+    const [friEnd, setFriEnd] = useState();
+    const [satStart, setSatStart] = useState();
+    const [satEnd, setSatEnd] = useState();
+    const [sunStart, setSunStart] = useState();
+    const [sunEnd, setSunEnd] = useState();
+
+    let navigate = useNavigate();
+    let location = useLocation();
+
+    useEffect(() => {
+        if (location.state) {
+            let store_name = location.state.store_name;
+            console.log("Hours");
+            setStoreName(store_name);
+            console.log(store_name);
+
+            fetch("/api/getHours", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    token
+                })
+            }).then(res => res.json()
+            ).then(
+                data => {
+                    let hours = data["hours"];
+                    console.log(hours);
+                    hours.forEach((day) => {
+                        if(day.open_time.length === 7){
+                            day.open_time = "0" + day.open_time;
+                        }
+                        if(day.close_time.length === 7){
+                            day.close_time = "0" + day.close_time;
+                        }
+
+                        if(day.day === "Monday"){
+                            setMonStart(day.open_time);
+                            setMonEnd(day.close_time);
+                        } else if(day.day === "Tuesday"){
+                            setTueStart(day.open_time);
+                            setTueEnd(day.close_time);
+                        } else if(day.day === "Wednesday"){
+                            setWedStart(day.open_time);
+                            setWedEnd(day.close_time);
+                        } else if(day.day === "Thursday"){
+                            setThuStart(day.open_time);
+                            setThuEnd(day.close_time);
+                        } else if(day.day === "Friday"){
+                            setFriStart(day.open_time);
+                            setFriEnd(day.close_time);
+                        } else if(day.day === "Saturday"){
+                            setSatStart(day.open_time);
+                            setSatEnd(day.close_time);
+                        } else if(day.day === "Sunday"){
+                            setSunStart(day.open_time);
+                            setSunEnd(day.close_time);
+                        }
+
+                        console.log(day);
+                    });
+                }
+            )
+        }
+    }, [location.state, token])
+
+    const handleSubmit = async e => {
+        e.preventDefault();
+        let err;
+
+        if (monStart && monEnd) {
+            err = await addHours({
+                token,
+                "day": "Monday",
+                "open_time": monStart,
+                "close_time": monEnd
+            });
+        }
+        if (tueStart && tueEnd) {
+            console.log(tueEnd);
+            err = await addHours({
+                token,
+                "day": "Tuesday",
+                "open_time": tueStart,
+                "close_time": tueEnd
+            });
+        }
+        if (wedStart && wedEnd) {
+            err = await addHours({
+                token,
+                "day": "Wednesday",
+                "open_time": wedStart,
+                "close_time": wedEnd
+            });
+        }
+        if (thuStart && thuEnd) {
+            err = await addHours({
+                token,
+                "day": "Thursday",
+                "open_time": thuStart,
+                "close_time": thuEnd
+            });
+        }
+        if (friStart && friEnd) {
+            err = await addHours({
+                token,
+                "day": "Friday",
+                "open_time": friStart,
+                "close_time": friEnd
+            });
+        }
+        if (satStart && satEnd) {
+            err = await addHours({
+                token,
+                "day": "Saturday",
+                "open_time": satStart,
+                "close_time": satEnd
+            });
+        }
+        if (sunStart && sunEnd) {
+            err = await addHours({
+                token,
+                "day": "Sunday",
+                "open_time": sunStart,
+                "close_time": sunEnd
+            });
+        }
+
+        if (typeof err.error !== 'undefined') {
+            alert(err.error)
+        } else {
+            navigate("/store");
+        }
+    }
+
+    return (
+        <>
+            <main>
+                <div className="hours">
+                    <form onSubmit={handleSubmit} className="avail">
+                        <h3>{store_name}</h3>
+                        <label>
+                            Monday
+                        </label>
+                        <input type="time" value={monStart} onChange={e => setMonStart(e.target.value)}></input>
+                        <input type="time" value={monEnd} onChange={e => setMonEnd(e.target.value)}></input>
+                        <label>
+                            Tuesday
+                        </label>
+                        <input type="time" value={tueStart} onChange={e => setTueStart(e.target.value)}></input>
+                        <input type="time" value={tueEnd} onChange={e => setTueEnd(e.target.value)}></input>
+                        <label>
+                            Wednesday
+                        </label>
+                        <input type="time" value={wedStart} onChange={e => setWedStart(e.target.value)}></input>
+                        <input type="time" value={wedEnd} onChange={e => setWedEnd(e.target.value)}></input>
+                        <label>
+                            Thursday
+                        </label>
+                        <input type="time" value={thuStart} onChange={e => setThuStart(e.target.value)}></input>
+                        <input type="time" value={thuEnd} onChange={e => setThuEnd(e.target.value)}></input>
+                        <label>
+                            Friday
+                        </label>
+                        <input type="time" value={friStart} onChange={e => setFriStart(e.target.value)}></input>
+                        <input type="time" value={friEnd} onChange={e => setFriEnd(e.target.value)}></input>
+                        <label>
+                            Saturday
+                        </label>
+                        <input type="time" value={satStart} onChange={e => setSatStart(e.target.value)}></input>
+                        <input type="time" value={satEnd} onChange={e => setSatEnd(e.target.value)}></input>
+                        <label>
+                            Sunday
+                        </label>
+                        <input type="time" value={sunStart} onChange={e => setSunStart(e.target.value)}></input>
+                        <input type="time" value={sunEnd} onChange={e => setSunEnd(e.target.value)}></input>
+                        <button type="submit" id="submit">Submit</button>
+                    </form>
+                </div>
             </main>
         </>
     )

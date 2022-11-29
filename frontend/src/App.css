@@ -27,3 +27,9 @@ nav a:hover {
   text-decoration: none;
   color: white;
 }
+
+.calendar {
+  margin: auto;
+  width: 50%;
+  margin-top: 10px;
+}

@@ -82,8 +82,11 @@ def execute(query: str, params: tuple, returnID: bool = False):
         return id
     
 class Availability:
+    first_name = ""
+    last_name = ""
+
     #Add availability for employee
-    def add(self, employee_id: str, dayOfWeek: str, start_time: datetime, end_time: datetime):
+    def add(self, employee_id: str, dayOfWeek: str, start_time: str, end_time: str):
         self.employee_id = employee_id
         self.start_time = start_time
         self.end_time = end_time
@@ -112,12 +115,11 @@ class Availability:
             self.day = result[2]
             self.start_time = result[3]
             self.end_time = result[4]
-            return self
         else:
-            return False
+            return "Could not find availability"
     
     #Set availability for employee
-    def set(self, start_time: datetime = None, end_time: datetime = None):
+    def set(self, start_time: str = None, end_time: str = None):
         if(not self.employee_id):
             return "Cannot set before init!"
         
@@ -138,6 +140,8 @@ class Availability:
         return {
             "id": self.id,
             "Employee_id": self.employee_id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
             "day": self.day,
             "start_time": self.start_time,
             "end_time": self.end_time
@@ -145,7 +149,7 @@ class Availability:
 
 class Hours:
     #Add operating hours for business
-    def add(self, store_id: str, dayOfWeek: str, open_time: datetime, close_time: datetime):
+    def add(self, store_id: str, dayOfWeek: str, open_time: str, close_time: str):
         self.store_id = store_id
         self.open_time = open_time
         self.close_time = close_time
@@ -174,19 +178,18 @@ class Hours:
             self.day = result[2]
             self.open_time = result[3]
             self.close_time = result[4]
-            return self
         else:
-            return False
+            return "Could not find hours."
     
     #Set operating hours for business
-    def set(self, open_time: datetime = None, close_time: datetime = None):
+    def set(self, open_time: str = None, close_time: str = None):
         if(not self.store_id):
             return("Cannot set before init!")
 
         if(open_time):
             self.open_time = open_time
         if(close_time):
-            self.end_time = close_time
+            self.close_time = close_time
 
         log.warning(self.day + " hours for Store \"" + str(self.store_id) + "\" has been updated!")
         return execute("UPDATE Hours SET open_time = %s, close_time = %s WHERE store_id = %s AND day = %s", (self.open_time, self.close_time, self.store_id, self.day))
@@ -334,7 +337,7 @@ class Holiday:
 
 class Employee:
     #Add employee
-    def add(self, store_id: str, first_name: str, last_name: str, PTO_Days_Rem: int = 0, DOB: str = '2000-01-01'):
+    def add(self, store_id: str, first_name: str, last_name: str, PTO_Days_Rem: int = 0, DOB: datetime = '2000-01-01'):
         self.store_id = store_id
         self.first_name = first_name
         self.last_name = last_name
@@ -407,22 +410,24 @@ class Employee:
         return timeoffs
     
     #Get availability for employee
-    def getAvailability(self):
-        avail = []
-        avail.append(Availability().get(self.id, "Monday"))
-        avail.append(Availability().get(self.id, "Tuesday"))
-        avail.append(Availability().get(self.id, "Wednesday"))
-        avail.append(Availability().get(self.id, "Thursday"))
-        avail.append(Availability().get(self.id, "Friday"))
-        avail.append(Availability().get(self.id, "Saturday"))
-        avail.append(Availability().get(self.id, "Sunday"))
-
-        pavail = []
-        for day in avail:
-            if(day):
-                pavail.append(day)
+    def getAvailability(self, dayOfWeek: str = None):
+        if(dayOfWeek):
+            avail = Availability()
+            err = avail.get(self.id, dayOfWeek)
+            if(not err):
+                return avail
         
-        return pavail
+        else:
+            dayList = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+            availList = []
+            for day in dayList:
+                avail = Availability()
+                err = avail.get(self.id, day)
+                if(not err):
+                    availList.append(avail)
+            
+            return availList
         
     def to_dict(self):
         return {
@@ -512,22 +517,20 @@ class Store:
         return holidays
     
     #Get hours for store
-    def getHours(self):
-        hours = []
-        hours.append(Hours().get(self.id, "Monday"))
-        hours.append(Hours().get(self.id, "Tuesday"))
-        hours.append(Hours().get(self.id, "Wednesday"))
-        hours.append(Hours().get(self.id, "Thursday"))
-        hours.append(Hours().get(self.id, "Friday"))
-        hours.append(Hours().get(self.id, "Saturday"))
-        hours.append(Hours().get(self.id, "Sunday"))
-
-        phours = []
-        for day in hours:
-            if(day):
-                phours.append(day)
-        
-        return phours
+    def getHours(self, dayOfWeek: str = None):
+        if(dayOfWeek):
+            hour = Hours()
+            err = hour.get(self.id, dayOfWeek)
+            if(not err):
+                return hour
+        else:
+            dayList = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            hourList = []
+            for day in dayList:
+                hour = Hours()
+                if(not hour.get(self.id, day)):
+                    hourList.append(hour)
+            return hourList
 
     def to_dict(self):
         return {
