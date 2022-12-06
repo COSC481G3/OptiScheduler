@@ -53,7 +53,8 @@ def create_db():
     cursor.execute("CREATE TABLE TimeOff(timeoff_id INT NOT NULL AUTO_INCREMENT, Employee_id INT, start DATETIME, end DATETIME, hours INT, PRIMARY KEY(timeoff_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
     cursor.execute("CREATE TABLE Availability(avail_id INT NOT NULL AUTO_INCREMENT, Employee_id INT, day varchar(40), start_time TIME, end_time TIME, isScheduled BOOLEAN, PRIMARY KEY(avail_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
     cursor.execute("CREATE TABLE Hours(hours_id INT NOT NULL AUTO_INCREMENT, store_id INT, day varchar(40), open_time TIME, close_time TIME, PRIMARY KEY(hours_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
-    
+    cursor.execute("CREATE TABLE Schedule(schedule_id INT NOT NULL AUTO_INCREMENT, store_id INT, Employee_id INT, date DATE, start_time TIME, end_time TIME, PRIMARY KEY(schedule_id), FOREIGN KEY(store_id) REFERENCES Store(store_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
+
     #Users for login info
     cursor.execute("CREATE TABLE User(user_id INT NOT NULL AUTO_INCREMENT, store_id INT, username varchar(99) NOT NULL, password varchar(99) NOT NULL, token varchar(99) NOT NULL, PRIMARY KEY(user_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
 
@@ -79,6 +80,90 @@ def execute(query: str, params: tuple, returnID: bool = False):
 
     if(returnID):
         return id
+
+class Schedule:
+    def add(self, employee_id: int, date: str, start_time: str, end_time: str):
+        emp = Employee()
+        err = emp.get(employee_id)
+        if(err):
+            return err
+
+        self.store_id = emp.store_id
+        self.employee_id = employee_id
+        self.date = date
+        self.start_time = start_time
+        self.end_time = end_time
+
+        ex = execute("INSERT INTO Schedule(store_id, Employee_id, date, start_time, end_time) VALUES (%s, %s, %s, %s, %s)", (self.store_id, employee_id, date, start_time, end_time), True)
+        if(ex == "Database error."):
+            return ex
+        
+        self.id = ex
+        log.warning(str(employee_id) + " added to Schedule for " + str(date))
+
+    def get(self, employee_id, date):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("SELECT * FROM Schedule WHERE employee_id = %s AND date = %s", (employee_id, date))
+        result = cursor.fetchone()
+        cursor.close()
+
+        if(result):
+            self.id = result[0]
+            self.store_id = result[1]
+            self.employee_id = result[2]
+            self.date = result[3]
+            self.start_time = result[4]
+            self.end_time = result[5]
+        else:
+            return "Could not find schedule item"
+    
+    def getID(self, id):
+        db.ping(True)
+        cursor = db.cursor(buffered=True)
+        cursor.execute("SELECT * FROM Schedule WHERE schedule_id = %s", (id, ))
+        result = cursor.fetchone()
+        cursor.close()
+
+        if(result):
+            self.id = result[0]
+            self.store_id = result[1]
+            self.employee_id = result[2]
+            self.date = result[3]
+            self.start_time = result[4]
+            self.end_time = result[5]
+        else:
+            return "Could not find schedule item"
+    
+    def set(self, start_time: str = None, end_time: str = None):
+        if(not self.employee_id):
+            return "Cannot set before init!"
+        
+        if(start_time):
+            self.start_time = start_time
+        if(end_time):
+            self.end_time = end_time
+        
+        log.warning(str(self.employee_id) + " updated to Schedule for " + str(self.date))
+        return execute("UPDATE Schedule SET start_time = %s, end_time = %s WHERE store_id = %s AND Employee_id = %s AND date = %s", (self.start_time, self.end_time, self.store_id, self.employee_id, self.date))
+
+    def delete(self):
+        log.warning(str(self.employee_id) + " deleted from Schedule for " + str(self.date))
+        return execute("DELETE FROM Schedule WHERE store_id = %s AND Employee_id = %s AND date = %s", (self.store_id, self.employee_id, self.date))
+
+    def to_dict(self):
+        emp = Employee()
+        emp.get(self.employee_id)
+        return {
+            "id": self.id,
+            "store_id": self.store_id,
+            "employee_id": self.employee_id,
+            "date": self.date,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "first_name": emp.first_name,
+            "last_name": emp.last_name
+        }
 
 class Availability:
     first_name = ""
@@ -534,6 +619,23 @@ class Store:
                 if(not hour.get(self.id, day)):
                     hourList.append(hour)
             return hourList
+    
+    #Get schedule for a store
+    def getSchedule(self, date):
+        db.ping(True)
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM Schedule WHERE store_id = %s AND date = %s", (self.id, date))
+        result = cursor.fetchall()
+        cursor.close()
+        schedules = []
+
+        #Cycles through all matching schedules in db, appends them to list
+        for schedule in result:
+            s = Schedule()
+            s.getID(schedule[0])
+            schedules.append(s)
+        
+        return schedules
 
     def to_dict(self):
         return {

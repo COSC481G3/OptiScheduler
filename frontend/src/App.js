@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css';
 import './App.css';
@@ -9,8 +9,18 @@ import Store from './components/Store/Store'
 import Holidays from './components/Holidays/Holidays'
 import useToken from './useToken';
 
-async function setAvailability(credentials) {
-  return fetch('/api/setAvailability', {
+async function addSchedule(credentials) {
+  return fetch('/api/addSchedule', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(credentials)
+  }).then(res => res.json())
+}
+
+async function deleteSchedule(credentials) {
+  return fetch('/api/deleteSchedule', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -44,6 +54,7 @@ function App() {
           <Route path="employees/*" element={<Employees token={token} />} />
           <Route path="store/*" element={<Store token={token} />} />
           <Route path="holidays/*" element={<Holidays token={token} />} />
+          <Route path="schedule/*" element={<ScheduleDetails token={token} />} />
         </Routes>
       </div>
     </div>
@@ -52,47 +63,81 @@ function App() {
 
 // Home
 function Home({ token }) {
+  let location = useLocation();
+  var ddate = new Date();
 
-  //Gets data from /api/hello endpoint, sets it to data variable.
-  const [date, setDate] = useState(new Date())
+  if(location.state){
+    let olddate = location.state.date.split("T")[0];
+    console.log(olddate);
+    ddate.setFullYear(olddate.split("-")[0], olddate.split("-")[1]-1, olddate.split("-")[2]);
+  }
+
+  const [date, setDate] = useState(ddate)
   const [availabilities, setAvail] = useState([]);
+  const [schedule, setSchedule] = useState([]);
   const [warning, setWarning] = useState();
   const [refresh, setRefresh] = useState();
 
   useEffect(() => {
-    fetch("/api/getAvailabilities", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        token,
-        "day": date.getDay(),
-        "date": date.toISOString()
-      })
-    }).then(res => res.json()
-    ).then(
-      data => {
-        console.log(data);
+    async function fetchAPI() {
+      await fetch("/api/getAvailabilities", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          token,
+          "day": date.getDay(),
+          "date": date.toISOString()
+        })
+      }).then(res => res.json()
+      ).then(
+        data => {
+          console.log(data);
 
-        if (typeof data.error !== 'undefined') {
-          if (data.error === 'Hours not yet set!') {
-            setWarning("Store closed.");
-          } else if(data.error === "Holiday") {
-            setWarning("Closed for " + data.name);
+          if (typeof data.error !== 'undefined') {
+            if (data.error === 'Hours not yet set!') {
+              setWarning("Store closed.");
+            } else if (data.error === "Holiday") {
+              setWarning("Closed for " + data.name);
+            } else {
+              alert(data.error);
+            }
+            setAvail([]);
+          } else if (data["availability"].length === 0) {
+            setWarning("No employees available.");
+            setAvail([]);
           } else {
-            alert(data.error);
+            setWarning("");
+            setAvail(data["availability"]);
           }
-          setAvail([]);
-        } else if (data["availability"].length === 0) {
-          setWarning("No employees available.");
-          setAvail([]);
-        } else {
-          setWarning("");
-          setAvail(data["availability"]);
         }
-      }
-    )
+      )
+
+      await fetch("/api/getSchedules", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          token,
+          "date": date.toISOString()
+        })
+      }).then(res => res.json()
+      ).then(
+        data => {
+          console.log(data);
+
+          if (typeof data.error !== 'undefined') {
+            alert(data.error)
+          } else {
+            setSchedule(data["schedules"]);
+          }
+        }
+      )
+    }
+
+    fetchAPI();
   }, [token, date, refresh])
 
   function formatTime(time) {
@@ -106,35 +151,18 @@ function Home({ token }) {
     return hours + ":" + minutes + suffix;
   }
 
-  async function handleAdd(emp_id, day) {
-    let err = await setAvailability({
+  async function handleRemove(emp_id) {
+    let err = await deleteSchedule({
       token,
       emp_id,
-      day,
-      is_scheduled: "True"
+      "date": date.toISOString()
     })
 
     if (typeof err.error !== 'undefined') {
       alert(err.error);
     } else {
       console.log("test");
-      setRefresh(emp_id + "True");
-    }
-  }
-
-  async function handleRemove(emp_id, day) {
-    let err = await setAvailability({
-      token,
-      emp_id,
-      day,
-      is_scheduled: "False"
-    })
-
-    if (typeof err.error !== 'undefined') {
-      alert(err.error);
-    } else {
-      console.log("test");
-      setRefresh(emp_id + "False");
+      setRefresh(emp_id + "False" + date.toISOString());
     }
   }
 
@@ -143,11 +171,11 @@ function Home({ token }) {
       <main className="home-wrapper">
         <Calendar onChange={setDate} value={date} className="calendar" />
         <h2>Schedule</h2>
-        {availabilities && availabilities.filter(availability => availability.isScheduled === 1).map(data => (
+        {schedule.map(data => (
           <div key={data.id} className="employee">
             <div className="name">{data.first_name} {data.last_name}</div>
             <div className="left">
-              <button className="add" onClick={() => { handleRemove(data.Employee_id, data.day) }}>-</button>
+              <button className="add" onClick={() => { handleRemove(data.employee_id) }}>-</button>
               <div className="time">
                 <div className="start">
                   {formatTime(data.start_time)} -
@@ -160,11 +188,11 @@ function Home({ token }) {
           </div>
         ))}
         {warning ? <h3>{warning}</h3> : <h3>Available Employees</h3>}
-        {availabilities && availabilities.filter(availability => availability.isScheduled === 0).map(data => (
+        {availabilities.map(data => (
           <div key={data.id} className="employee">
             <div className="name">{data.first_name} {data.last_name}</div>
             <div className="left">
-              <button className="add" onClick={() => { handleAdd(data.Employee_id, data.day) }}>+</button>
+              <Link to="/schedule" className="add" state={{ data, "date": date.toISOString() }}>+</Link>
               <div className="time">
                 <div className="start">
                   {formatTime(data.start_time)} -
@@ -176,6 +204,77 @@ function Home({ token }) {
             </div>
           </div>
         ))}
+      </main>
+    </>
+  )
+}
+
+function ScheduleDetails({ token }) {
+  const [first_name, setFirstName] = useState();
+  const [last_name, setLastName] = useState();
+  const [start_time, setStartTime] = useState();
+  const [end_time, setEndTime] = useState();
+  const [date, setDate] = useState("");
+  const [emp_id, setEmpID] = useState();
+  let navigate = useNavigate();
+  let location = useLocation();
+
+  useEffect(() => {
+    if (location.state) {
+      let data = location.state.data;
+      let date = location.state.date;
+      console.log(data);
+      console.log(date);
+
+      setFirstName(data.first_name);
+      setLastName(data.last_name);
+      if (data.start_time.length === 7) {
+        data.start_time = "0" + data.start_time;
+      }
+      if (data.end_time.length === 7) {
+        data.end_time = "0" + data.end_time;
+      }
+      setStartTime(data.start_time);
+      setEndTime(data.end_time);
+      setEmpID(data.Employee_id);
+      setDate(date);
+    }
+  }, [location.state])
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    let err = await addSchedule({
+      token,
+      emp_id,
+      date,
+      start_time,
+      end_time
+    });
+
+    if (typeof err.error !== 'undefined') {
+      alert(err.error)
+    } else {
+      navigate("/", { state: { date }});
+    }
+  }
+
+  return (
+    <>
+      <main className="sch-wrapper">
+        <form onSubmit={handleSubmit}>
+          <h3>{first_name} {last_name}</h3>
+          <h3>{date.split("T")[0]}</h3>
+          <label>
+            Start
+          </label>
+          <input type="time" value={start_time} min={start_time} max={end_time} onChange={e => setStartTime(e.target.value)}></input>
+          <label>
+            End
+          </label>
+          <input type="time" value={end_time} min={start_time} max={end_time} onChange={e => setEndTime(e.target.value)}></input>
+          <button type="submit" id="submit">Submit</button>
+        </form>
       </main>
     </>
   )
