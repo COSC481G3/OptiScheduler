@@ -22,6 +22,16 @@ async function addHours(credentials) {
     }).then(res => res.json())
 }
 
+async function deleteHours(credentials) {
+    return fetch('/api/deleteHours', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+    }).then(res => res.json())
+}
+
 export default function Store({ token }) {
     return (
         <div className="store-wrapper">
@@ -58,7 +68,7 @@ function StoreDetails({ token }){
                 if(data.address === " "){
                     setStoreAddress("");
                 } else {
-                    setStoreAddress(data.address)
+                    setStoreAddress(data.address);
                 }
 
                 console.log(data);
@@ -252,6 +262,40 @@ function StoreHours({ token }) {
         }
     }
 
+    async function onDeleteHours(day){
+        let err = await deleteHours({
+            token,
+            day
+        });
+
+        if (typeof err.error !== 'undefined') {
+            alert(err.error);
+        } else {
+            if(day === "Monday"){
+                setMonStart("");
+                setMonEnd("");
+            } else if(day === "Tuesday"){
+                setTueStart("");
+                setTueEnd("");
+            } else if(day === "Wednesday"){
+                setWedStart("");
+                setWedEnd("");
+            } else if(day === "Thursday"){
+                setThuStart("");
+                setThuEnd("");
+            } else if(day === "Friday"){
+                setFriStart("");
+                setFriEnd("");
+            } else if(day === "Saturday"){
+                setSatStart("");
+                setSatEnd("");
+            } else if(day === "Sunday"){
+                setSunStart("");
+                setSunEnd("");
+            }
+        }
+    }
+
     return (
         <>
             <main>
@@ -263,36 +307,43 @@ function StoreHours({ token }) {
                         </label>
                         <input type="time" value={monStart} onChange={e => setMonStart(e.target.value)}></input>
                         <input type="time" value={monEnd} onChange={e => setMonEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteHours("Monday") }}>Delete</button>
                         <label>
                             Tuesday
                         </label>
                         <input type="time" value={tueStart} onChange={e => setTueStart(e.target.value)}></input>
                         <input type="time" value={tueEnd} onChange={e => setTueEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteHours("Tuesday") }}>Delete</button>
                         <label>
                             Wednesday
                         </label>
                         <input type="time" value={wedStart} onChange={e => setWedStart(e.target.value)}></input>
                         <input type="time" value={wedEnd} onChange={e => setWedEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteHours("Wednesday") }}>Delete</button>
                         <label>
                             Thursday
                         </label>
                         <input type="time" value={thuStart} onChange={e => setThuStart(e.target.value)}></input>
                         <input type="time" value={thuEnd} onChange={e => setThuEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteHours("Thursday") }}>Delete</button>
                         <label>
                             Friday
                         </label>
                         <input type="time" value={friStart} onChange={e => setFriStart(e.target.value)}></input>
                         <input type="time" value={friEnd} onChange={e => setFriEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteHours("Friday") }}>Delete</button>
                         <label>
                             Saturday
                         </label>
                         <input type="time" value={satStart} onChange={e => setSatStart(e.target.value)}></input>
                         <input type="time" value={satEnd} onChange={e => setSatEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteHours("Saturday") }}>Delete</button>
                         <label>
                             Sunday
                         </label>
                         <input type="time" value={sunStart} onChange={e => setSunStart(e.target.value)}></input>
                         <input type="time" value={sunEnd} onChange={e => setSunEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteHours("Sunday") }}>Delete</button>
                         <button type="submit" id="submit">Submit</button>
                     </form>
                 </div>

@@ -51,9 +51,8 @@ def create_db():
     cursor.execute("CREATE TABLE Holiday(holiday_id INT NOT NULL AUTO_INCREMENT, store_id INT, name VARCHAR(40), start DATETIME, end DATETIME, PRIMARY KEY(holiday_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
     cursor.execute("CREATE TABLE Employee(Employee_id INT NOT NULL AUTO_INCREMENT, store_id INT, first_name varchar(40) NOT NULL, last_name varchar(40) NOT NULL, PTO_Days_Rem INT, DOB DATE, PRIMARY KEY(Employee_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
     cursor.execute("CREATE TABLE TimeOff(timeoff_id INT NOT NULL AUTO_INCREMENT, Employee_id INT, start DATETIME, end DATETIME, hours INT, PRIMARY KEY(timeoff_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
-    cursor.execute("CREATE TABLE Availability(avail_id INT NOT NULL AUTO_INCREMENT, Employee_id INT, day varchar(40), start_time TIME, end_time TIME, PRIMARY KEY(avail_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
+    cursor.execute("CREATE TABLE Availability(avail_id INT NOT NULL AUTO_INCREMENT, Employee_id INT, day varchar(40), start_time TIME, end_time TIME, isScheduled BOOLEAN, PRIMARY KEY(avail_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
     cursor.execute("CREATE TABLE Hours(hours_id INT NOT NULL AUTO_INCREMENT, store_id INT, day varchar(40), open_time TIME, close_time TIME, PRIMARY KEY(hours_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
-    cursor.execute("CREATE TABLE Schedule(auto_id INT NOT NULL AUTO_INCREMENT, Employee_id INT, Date DATE, start_time TIME, end_time TIME, PRIMARY KEY(auto_id), FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id))")
     
     #Users for login info
     cursor.execute("CREATE TABLE User(user_id INT NOT NULL AUTO_INCREMENT, store_id INT, username varchar(99) NOT NULL, password varchar(99) NOT NULL, token varchar(99) NOT NULL, PRIMARY KEY(user_id), FOREIGN KEY(store_id) REFERENCES Store(store_id))")
@@ -80,20 +79,20 @@ def execute(query: str, params: tuple, returnID: bool = False):
 
     if(returnID):
         return id
-    
+
 class Availability:
     first_name = ""
     last_name = ""
 
     #Add availability for employee
-    def add(self, employee_id: str, dayOfWeek: str, start_time: str, end_time: str):
+    def add(self, employee_id: str, dayOfWeek: str, start_time: str, end_time: str, isScheduled: bool = False):
         self.employee_id = employee_id
         self.start_time = start_time
         self.end_time = end_time
         #fix string format for day of week set first letter capital rest lower.
         self.day = dayOfWeek[0].upper() + dayOfWeek[1:(len(dayOfWeek))]
 
-        ex = execute("INSERT INTO Availability(Employee_id, day, start_time, end_time) VALUES (%s, %s, %s, %s)", (employee_id, self.day, start_time, end_time))
+        ex = execute("INSERT INTO Availability(Employee_id, day, start_time, end_time, isScheduled) VALUES (%s, %s, %s, %s, %s)", (employee_id, self.day, start_time, end_time, isScheduled))
         if(ex == "Database error."):
             return ex
         
@@ -115,11 +114,12 @@ class Availability:
             self.day = result[2]
             self.start_time = result[3]
             self.end_time = result[4]
+            self.isScheduled = result[5]
         else:
             return "Could not find availability"
     
     #Set availability for employee
-    def set(self, start_time: str = None, end_time: str = None):
+    def set(self, start_time: str = None, end_time: str = None, isScheduled: bool = None):
         if(not self.employee_id):
             return "Cannot set before init!"
         
@@ -127,9 +127,11 @@ class Availability:
             self.start_time = start_time
         if(end_time):
             self.end_time = end_time
+        if(isScheduled is not None):
+            self.isScheduled = isScheduled
         
         log.warning(self.day + " availability for Employee \"" + str(self.employee_id) + "\" has been updated!")
-        return execute("UPDATE Availability SET start_time = %s, end_time = %s WHERE Employee_id = %s AND day = %s", (self.start_time, self.end_time, self.employee_id, self.day))
+        return execute("UPDATE Availability SET start_time = %s, end_time = %s, isScheduled = %s WHERE Employee_id = %s AND day = %s", (self.start_time, self.end_time, self.isScheduled, self.employee_id, self.day))
     
     #Delete availability for employee
     def delete(self):
@@ -144,7 +146,8 @@ class Availability:
             "last_name": self.last_name,
             "day": self.day,
             "start_time": self.start_time,
-            "end_time": self.end_time
+            "end_time": self.end_time,
+            "isScheduled": self.isScheduled
         }
 
 class Hours:
@@ -323,7 +326,7 @@ class Holiday:
     
     #Delete holiday from db
     def delete(self):
-        log.warning("Employee \"" + self.name + "\" has been deleted!")
+        log.warning("Holiday \"" + self.name + "\" has been deleted!")
         return execute("DELETE FROM Holiday WHERE holiday_id = %s", (self.id, ))
     
     def to_dict(self):
