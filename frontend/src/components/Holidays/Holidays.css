@@ -1,0 +1,149 @@
+.holiday {
+    background-color: #484848;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.holiday .addemployee {
+    display: block;
+    text-decoration: none;
+    background: none;
+    border-style:none;
+    border-color: grey;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    float: left;
+    cursor:pointer;
+}
+
+.holiday .addemployee:hover {
+    background-color: #d50000;
+    color: white;
+}
+
+.holiday .left {
+    margin-left: auto;
+}
+
+.holiday .name {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.holiday .start {
+    margin-left: 10px;
+}
+
+.holiday .end {
+    margin-left: 10px;
+}
+
+.hol-wrapper .search {
+    display: block;
+    color: black;
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    padding: 5px;
+    background-color: rgba(255,255,255,0.55);
+    border-radius: 5px;
+}
+
+.hol-wrapper .addButton {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    background-color: #d50000;
+    margin: 10px;
+    float: right;
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    font-size: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+}
+
+.hol-wrapper .addButton:hover {
+    background-color: #d50000bd;
+    color: white;
+}
+
+.hol-wrapper form{
+    width: 400px;
+    /*background-color: rgba(255, 255, 255, 0);*/
+    background-color: #212121;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 50px 35px;
+}
+
+.hol-wrapper form *{
+    font-family: 'Roboto', sans-serif;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    outline: none;
+    border: none;
+}
+
+.hol-wrapper form:after {
+    position: absolute;
+    content: "";
+    bottom: -40px;
+    height: 40px;
+    width: 1px;
+}
+
+.hol-wrapper form h3{
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 42px;
+    text-align: center;
+}
+
+.hol-wrapper form label{
+    display: block;
+    margin-top: 30px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.hol-wrapper form input{
+    display: block;
+    height: 50px;
+    width: 100%;
+    background-color: rgba(255,255,255,0.10);
+    color: #ffffff;
+    border-radius: 3px;
+    padding: 0 10px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.hol-wrapper form button{
+    margin-top: 50px;
+    width: 100%;
+    background-color: #ffffff;
+    color: #080710;
+    padding: 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+}

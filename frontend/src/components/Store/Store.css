@@ -14,7 +14,15 @@
 }
 
 .store-wrapper .hours form {
-    transform: translate(-50%,-25%);
+    transform: translate(-50%,-23%);
+}
+
+.store-wrapper .hours form:after {
+    position: absolute;
+    content: "";
+    bottom: -40px;
+    height: 40px;
+    width: 1px;
 }
 
 .store-wrapper form *{
@@ -62,4 +70,38 @@
     font-weight: 600;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.store-wrapper form .altbutton{
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 10px;
+    width: 100%;
+    color: #ffffff;
+    background-color: rgba(255,255,255,0.07);
+    padding: 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    border-color: black;
+    border-style:solid;
+}
+
+.store-wrapper form .deleteHours{
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    color: #ffffff;
+    background-color: rgba(255,255,255,0.07);
+    padding: 0px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    border-color: black;
+    border-style:solid;
+    margin-top: 10px;
 }

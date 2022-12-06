@@ -665,6 +665,69 @@ def getHoliday():
     else:
         return json.dumps(hol.to_dict(), default=str)
 
+# /api/getHoliday?token=X&hol_id=X&name=X&start=X&end=X
+@app.route('/api/setHoliday', methods=['GET', 'POST'])
+@limiter.limit("1/second")
+def setHoliday():
+
+    #Get params
+    if request.method == 'GET':
+        token = request.args.get('token')
+        id = request.args.get('hol_id')
+        name = request.args.get('name')
+        start = request.args.get('start')
+        end = request.args.get('end')
+    elif request.method == 'POST':
+        jsonres = request.get_json()
+        token = jsonres.get('token')
+        id = jsonres.get('hol_id')
+        name = jsonres.get('name')
+        start = jsonres.get('start')
+        end = jsonres.get('end')
+    if(token is None or id is None):
+        return {
+            "error": "Value cannot be null!"
+        }
+    
+    #Get user
+    user = db.User()
+    err = user.get(token)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Get holiday
+    hol = db.Holiday()
+    err = hol.get(id)
+    if(err):
+        return {
+            "error": err
+        }
+    
+    #Format date
+    try:
+        if(start):
+            start = datetime.fromisoformat(start)
+        if(end):
+            end = datetime.fromisoformat(end)
+    except ValueError:
+        return {
+            "error": "start & end must be in ISO8601!"
+        }
+    
+    #Set holiday
+    err = hol.set(name, start, end)
+    if(err):
+        return {
+            "error": err
+        }
+    else:
+        return {
+            "success": "Successfully set holiday!"
+        }
+
+
 # /api/getHolidays?token=X
 @app.route('/api/getHolidays', methods=['GET', 'POST'])
 @limiter.limit("1/second")
@@ -876,7 +939,7 @@ def setHours():
         }
 
 # /api/deleteHours?token=X&day=X
-@app.route('/api/deleteHours', methods=['GET, POST'])
+@app.route('/api/deleteHours', methods=['GET', 'POST'])
 def deleteHours():
     #Get params
     if request.method == 'GET':
@@ -1007,7 +1070,7 @@ def getAvailability():
     availabilities = [ava.to_dict() for ava in employee.getAvailability()]
     return json.dumps({"availability": availabilities}, default=str)
 
-# /api/setAvailability?token=X&emp_id=X&day=X&start_time=X&end_time=X
+# /api/setAvailability?token=X&emp_id=X&day=X&start_time=X&end_time=X&is_scheduled=X
 @app.route('/api/setAvailability', methods=['GET', 'POST'])
 def setAvailability():
     #Get params
@@ -1017,6 +1080,7 @@ def setAvailability():
         day = request.args.get('day')
         start_time = request.args.get('start_time')
         end_time = request.args.get('end_time')
+        isScheduled = request.args.get('is_scheduled')
     elif request.method == 'POST':
         jsonres = request.get_json()
         token = jsonres.get('token')
@@ -1024,6 +1088,7 @@ def setAvailability():
         day = jsonres.get('day')
         start_time = jsonres.get('start_time')
         end_time = jsonres.get('end_time')
+        isScheduled = jsonres.get('is_scheduled')
     if(token is None or day is None or emp_id is None):
         return {
             "error": "Value cannot be null!"
@@ -1048,6 +1113,14 @@ def setAvailability():
             "error": "start & end must be in ISO8601!"
         }
 
+    app.logger.warning(isScheduled)
+    
+    #Format isScheduled to bool
+    if(isScheduled):
+        isScheduled = (isScheduled == "True")
+    
+    app.logger.warning(isScheduled)
+
     #Get availability
     avail = db.Availability()
     err = avail.get(emp_id, day)
@@ -1057,7 +1130,7 @@ def setAvailability():
         }
     
     #Set availability
-    err = avail.set(start_time, end_time)
+    err = avail.set(start_time=start_time, end_time=end_time, isScheduled=isScheduled)
     if(err):
         return {
             "error": err
@@ -1068,7 +1141,7 @@ def setAvailability():
         }
 
 # /api/deleteAvailability?token=X&emp_id=X&day=X
-@app.route('/api/deleteAvailability', methods=['GET, POST'])
+@app.route('/api/deleteAvailability', methods=['GET', 'POST'])
 def deleteAvailability():
     #Get params
     if request.method == 'GET':
@@ -1112,17 +1185,19 @@ def deleteAvailability():
             "success": "Successfully deleted availability."
         }
 
-@app.route('/api/getSchedule', methods=['GET', 'POST'])
+@app.route('/api/getAvailabilities', methods=['GET', 'POST'])
 def getSchedule():
     #Get params
     if request.method == 'GET':
         token = request.args.get('token')
         day = request.args.get('day')
+        date = request.args.get('date')
     elif request.method == 'POST':
         jsonres = request.get_json()
         token = jsonres.get('token')
         day = jsonres.get('day')
-    if(token is None or day is None):
+        date = jsonres.get('date')
+    if(token is None or day is None or date is None):
         return {
             "error": "Value cannot be null!"
         }
@@ -1157,6 +1232,20 @@ def getSchedule():
         return {
             "error": "Hours not yet set!"
         }
+
+    #Get holidays
+    holidays = user.store.getHolidays()
+    for holiday in holidays:
+        start = datetime.fromisoformat(str(holiday.start))
+        end = datetime.fromisoformat(str(holiday.end))
+        current = datetime.fromisoformat(str(date).split("T")[0])
+
+        if start <= current <= end:
+            return {
+                "error": "Holiday",
+                "name": holiday.name
+            }
+
 
     #Get employees
     employees = user.store.getEmployees()

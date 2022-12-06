@@ -42,13 +42,19 @@ async function addAvailability(credentials) {
     }).then(res => res.json())
 }
 
+async function deleteAvailability(credentials) {
+    return fetch('/api/deleteAvailability', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+    }).then(res => res.json())
+}
+
 export default function Employees({ token }) {
     return (
         <div className="emp-wrapper">
-            <nav>
-                <Link to="/employees">List All Employees</Link>
-                <Link to="/employees/employee">Add Employee</Link>
-            </nav>
             <Routes>
                 <Route path="/" element={<ListEmployees token={token} />} />
                 <Route path="/employee" element={<EmployeeDetails token={token} />} />
@@ -115,6 +121,7 @@ function ListEmployees({ token }) {
                         </div>
                     </div>
                 ))}
+                <Link to="/employees/employee" className="addButton">+</Link>
             </main>
         </>
     )
@@ -359,6 +366,41 @@ function EmployeeAvailability({ token }) {
         }
     }
 
+    async function onDeleteAvailability(day){
+        let err = await deleteAvailability({
+            token,
+            day,
+            emp_id
+        });
+
+        if (typeof err.error !== 'undefined') {
+            alert(err.error);
+        } else {
+            if(day === "Monday"){
+                setMonStart("");
+                setMonEnd("");
+            } else if(day === "Tuesday"){
+                setTueStart("");
+                setTueEnd("");
+            } else if(day === "Wednesday"){
+                setWedStart("");
+                setWedEnd("");
+            } else if(day === "Thursday"){
+                setThuStart("");
+                setThuEnd("");
+            } else if(day === "Friday"){
+                setFriStart("");
+                setFriEnd("");
+            } else if(day === "Saturday"){
+                setSatStart("");
+                setSatEnd("");
+            } else if(day === "Sunday"){
+                setSunStart("");
+                setSunEnd("");
+            }
+        }
+    }
+
     return (
         <>
             <main>
@@ -370,36 +412,43 @@ function EmployeeAvailability({ token }) {
                         </label>
                         <input type="time" value={monStart} onChange={e => setMonStart(e.target.value)}></input>
                         <input type="time" value={monEnd} onChange={e => setMonEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteAvailability("Monday") }}>Delete</button>
                         <label>
                             Tuesday
                         </label>
                         <input type="time" value={tueStart} onChange={e => setTueStart(e.target.value)}></input>
                         <input type="time" value={tueEnd} onChange={e => setTueEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteAvailability("Tuesday") }}>Delete</button>
                         <label>
                             Wednesday
                         </label>
                         <input type="time" value={wedStart} onChange={e => setWedStart(e.target.value)}></input>
                         <input type="time" value={wedEnd} onChange={e => setWedEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteAvailability("Wednesday") }}>Delete</button>
                         <label>
                             Thursday
                         </label>
                         <input type="time" value={thuStart} onChange={e => setThuStart(e.target.value)}></input>
                         <input type="time" value={thuEnd} onChange={e => setThuEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteAvailability("Thursday") }}>Delete</button>
                         <label>
                             Friday
                         </label>
                         <input type="time" value={friStart} onChange={e => setFriStart(e.target.value)}></input>
                         <input type="time" value={friEnd} onChange={e => setFriEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteAvailability("Friday") }}>Delete</button>
                         <label>
                             Saturday
                         </label>
                         <input type="time" value={satStart} onChange={e => setSatStart(e.target.value)}></input>
                         <input type="time" value={satEnd} onChange={e => setSatEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteAvailability("Saturday") }}>Delete</button>
                         <label>
                             Sunday
                         </label>
                         <input type="time" value={sunStart} onChange={e => setSunStart(e.target.value)}></input>
                         <input type="time" value={sunEnd} onChange={e => setSunEnd(e.target.value)}></input>
+                        <button type="button" className="deleteHours" onClick={() => { onDeleteAvailability("Sunday") }}>Delete</button>
                         <button type="submit" id="submit">Submit</button>
                     </form>
                 </div>
